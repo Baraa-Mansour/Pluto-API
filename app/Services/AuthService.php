@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Services;
+
+use App\Repositories\UserRepo;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+
+class AuthService
+{
+    private UserRepo $userRepo;
+
+    public function __construct(UserRepo $userRepo)
+    {
+        $this->userRepo = $userRepo;
+    }
+
+
+    public function registerUser(array $userData): bool
+    {
+        Log::info('service registerUser called for phone: ' . $userData['phone']);
+
+        $user = $this->getUserInstanceFromData($userData);
+
+        $isSaved = $this->userRepo->saveUser($user);
+
+        Log::info('service registerUser ' . ($isSaved ? 'succeeded' : 'failed') . ' for phone: ' . $userData['phone']);
+
+        return $isSaved;
+    }
+    
+    public function loginUser(string $phone, string $password): ?User
+    {
+        Log::info('service loginUser called for phone: ' . $phone);
+
+        $user = $this->userRepo->findByPhone($phone);
+
+        if ($user && password_verify($password, $user->password)) 
+        {
+            Log::info('service loginUser succeeded for phone: ' . $phone);
+            return $user;
+        }
+
+        Log::info('service loginUser failed for phone: ' . $phone);
+        
+        return null;
+    }
+
+    // Create new user instance from data after hash pass and save images(take the path).
+    private function getUserInstanceFromData(array $userData): User
+    {
+        Log::info('service getUserInstanceFromData called for phone: ' . $userData['phone']);
+
+        $user = new User();
+        
+        $user->first_name = $userData['first_name'];
+        $user->last_name = $userData['last_name'];
+        $user->birth_date = $userData['birth_date'];
+        $user->phone = $userData['phone'];
+        $user->password = $userData['password']; // Hash the password in the model
+
+        $user->profile_image = $userData['profile_image']->store('profile_images', 'public'); // Store image and get path
+        $user->id_image = $userData['id_image']->store('id_images', 'public'); // Store image and get path
+
+        $user->role = User::ROLE_USER;
+        $user->status = User::STATUS_REGISTERED;
+
+        Log::info('service getUserInstanceFromData succeeded for phone: ' . $userData['phone']);
+
+        return $user;
+    }
+}
