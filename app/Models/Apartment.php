@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\City;
+use App\Models\User;
 
 class Apartment extends Model
 {
@@ -12,6 +14,10 @@ class Apartment extends Model
 
 
     // Relations
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
     public function user()
     {
         return $this->belongsTo(User::class);
