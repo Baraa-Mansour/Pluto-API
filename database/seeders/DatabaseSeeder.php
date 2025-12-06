@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ApartmentSeeder::class,
             FavouriteApartmentSeeder::class,
+            RateSeeder::class,
         ]);
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\City;
 use App\Models\User;
+use App\Models\Rate;
 
 class Apartment extends Model
 {
@@ -25,5 +26,9 @@ class Apartment extends Model
     public function favouriteByUsers()
     {
         return $this->belongsToMany(User::class, 'favourite_apartments');
+    }
+    public function rates()
+    {
+        return $this->hasMany(Rate::class);
     }
 }

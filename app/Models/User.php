@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Apartment;
+use App\Models\Rate;
 
 class User extends Authenticatable
 {
@@ -81,6 +83,10 @@ class User extends Authenticatable
     public function favouriteApartments()
     {
         return $this->belongsToMany(Apartment::class, 'favourite_apartments');
+    }
+    public function rates()
+    {
+        return $this->hasMany(Rate::class);
     }
 
 }
