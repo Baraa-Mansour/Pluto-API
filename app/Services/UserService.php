@@ -129,4 +129,14 @@ class UserService
 
         return $user;
     }
+    public function getFavouriteApartments(int $id)
+    {
+        Log::info('UserService getFavouriteApartments called for id: ' . $id);
+
+        $favouriteApartments = $this->userRepo->getFavouriteApartments($id);
+
+        Log::info('UserService getFavouriteApartments retrieved ' . $favouriteApartments->count() . ' favourite apartments');
+
+        return $favouriteApartments;
+    }
 }

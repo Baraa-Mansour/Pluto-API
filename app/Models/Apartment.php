@@ -13,6 +13,14 @@ class Apartment extends Model
     
     use HasFactory;
 
+    // URLs
+    public function getPhotoUrlAttribute()
+    {
+        return $this->photo
+            ? asset('storage/' . $this->photo)
+            : null;
+    }
+    //
 
     // Relations
     public function city()

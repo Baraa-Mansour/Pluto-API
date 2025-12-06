@@ -6,6 +6,7 @@ use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource\UserDetailResource;
+use App\Http\Resources\ApartmentResource\ApartmentScrollResource;
 
 class UserController extends Controller
 {
@@ -26,6 +27,19 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $user_resource
+        ], 200);
+    }
+
+    public function getFavouriteApartments(Request $request)
+    {
+        Log::info('User requested favourite apartments', ['user_id' => $request->user()->id]);
+
+        $favouriteApartments = $this->userService->getFavouriteApartments($request->user()->id);
+
+        $favouriteApartments_resource = ApartmentScrollResource::collection($favouriteApartments);
+
+        return response()->json([
+            'data' => $favouriteApartments_resource
         ], 200);
     }
 }

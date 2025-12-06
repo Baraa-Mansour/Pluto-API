@@ -43,6 +43,20 @@ class User extends Authenticatable
     }
     //
 
+    // Relations  
+    public function apartments()
+    {
+        return $this->hasMany(Apartment::class);
+    }
+    public function favouriteApartments()
+    {
+        return $this->belongsToMany(Apartment::class, 'favourite_apartments');
+    }
+    public function rates()
+    {
+        return $this->hasMany(Rate::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -73,20 +87,6 @@ class User extends Authenticatable
             'birth_date' => 'date',
             'password' => 'hashed',
         ];
-    }
-
-    // Relations  
-    public function apartments()
-    {
-        return $this->hasMany(Apartment::class);
-    }
-    public function favouriteApartments()
-    {
-        return $this->belongsToMany(Apartment::class, 'favourite_apartments');
-    }
-    public function rates()
-    {
-        return $this->hasMany(Rate::class);
     }
 
 }

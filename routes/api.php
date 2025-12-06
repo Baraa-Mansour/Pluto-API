@@ -34,5 +34,6 @@ Route::prefix('/user')
     ->group(function()
     {
         Route::get('/profile' , [UserController::class , 'getProfile']);
+        Route::get('/favourites' , [UserController::class , 'getFavouriteApartments']);
     });
     
