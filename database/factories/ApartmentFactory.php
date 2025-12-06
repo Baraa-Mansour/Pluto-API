@@ -19,9 +19,11 @@ class ApartmentFactory extends Factory
     {
         return [
             'user_id' => User::factory()->create([
-                'status' => fake()->randomElement(User::STATUS_ACTIVE)
+                'status' => fake()->randomElement([
+                    User::STATUS_ACTIVE
+                ])
             ])->id,
-            'city_id' => City::factory()->create()->id,
+            'city_id' => fake()->randomElement(City::pluck('id')),
             'area' => $this->faker->numberBetween(30, 200),
             'rooms' => $this->faker->numberBetween(1, 5),
             'floor' => $this->faker->numberBetween(1, 20),
