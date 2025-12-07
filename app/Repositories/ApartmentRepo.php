@@ -11,8 +11,39 @@ class ApartmentRepo
     {
         Log::info('ApartmentRepo getApartmentById called for id: ' . $id);
 
-        $apartment = Apartment::findOrFail($id);
+        $apartment = Apartment::with('city.governorate')->findOrFail($id);
 
         return $apartment;
+    }
+
+    public function checkIfApartmentExists(int $id)
+    {
+        Log::info('ApartmentRepo checkIfApartmentExists called for id: ' . $id);
+        return Apartment::where('id', $id)->exists();
+    }
+
+    public function getAllApartmentsWithFilters(array $filters)
+    {
+        Log::info('ApartmentRepo getAllApartmentsWithFilters called');
+
+        $apartments = Apartment::with('city.governorate')
+        ->when($filters['governorate_id'] ?? null, fn($q, $id) =>
+            $q->whereHas('city.governorate', fn($q2) => $q2->where('id', $id))
+        )
+        ->when($filters['city_id'] ?? null, fn($q, $id) =>
+            $q->where('city_id', $id)
+        )
+        ->when($filters['price'] ?? null, fn($q, $price) =>
+            $q->where('price', $price)
+        )
+        ->when($filters['area'] ?? null, fn($q, $area) =>
+            $q->where('area', $area)
+        )
+        ->when($filters['rooms'] ?? null, fn($q, $rooms) =>
+            $q->where('rooms', $rooms)
+        )
+        ->where('is_deleted', false)->get();
+
+        return $apartments;
     }
 }

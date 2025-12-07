@@ -9,6 +9,7 @@ use App\Repositories\ApartmentRepo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use App\Models\FavouriteApartment;
+use App\Models\Apartment;
 use DomainException;
 
 class UserService
@@ -154,7 +155,13 @@ class UserService
     {
         Log::info('UserService addFavouriteApartment called for user id: ' . $userId . ' and apartment id: ' . $apartmentId);
 
-        $this->apartmentRepo->getApartmentById($apartmentId); // check if apartment exists and throw exception if not
+        $isApartmentExists = $this->apartmentRepo->checkIfApartmentExists($apartmentId);
+
+        if(!$isApartmentExists)
+        {
+            Log::warning('UserService addFavouriteApartment apartment not found for id: ' . $apartmentId);
+            throw (new ModelNotFoundException())->setModel(Apartment::class , $apartmentId);
+        }
 
         $isFavourite = $this->favouriteRepo->isFavourite($userId, $apartmentId);
 

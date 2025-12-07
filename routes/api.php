@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ApartmentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -43,3 +44,11 @@ Route::prefix('/user')
         Route::post('/rates/{apartmentId}' , [UserController::class , 'rateApartment']); // not implemented
     });
  
+
+Route::prefix('/apartments')
+    ->middleware('auth:sanctum')
+    ->group(function()
+    {
+        Route::get('/' , [ApartmentController::class , 'getApartmentsWithFilters']);
+        Route::get('/{apartmentId}' , [ApartmentController::class , 'getApartmentById']);
+    });
