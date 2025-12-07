@@ -30,10 +30,11 @@ class FavouriteRepo
     {
         Log::info('Adding favourite for user: ' . $userId . ' and apartment: ' . $apartmentId);
 
-        $isAdded = FavouriteApartment::create([
-            'user_id' => $userId,
-            'apartment_id' => $apartmentId,
-        ]);
+        $favourite = new FavouriteApartment();
+        $favourite->user_id = $userId;
+        $favourite->apartment_id = $apartmentId;
+        
+        $isAdded = $favourite->save();
 
         return $isAdded;
     }
@@ -45,5 +46,14 @@ class FavouriteRepo
         $isRemoved = FavouriteApartment::where('user_id', $userId)->where('apartment_id', $apartmentId)->delete();
 
         return $isRemoved;
+    }
+
+    public function isFavourite(int $userId, int $apartmentId) : bool
+    {
+        Log::info('FavouriteRepo isFavourite called for user: ' . $userId . ' and apartment: ' . $apartmentId);
+
+        $isFavourite = FavouriteApartment::where('user_id', $userId)->where('apartment_id', $apartmentId)->exists();
+
+        return $isFavourite;
     }
 }

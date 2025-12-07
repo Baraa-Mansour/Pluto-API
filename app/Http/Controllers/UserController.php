@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource\UserDetailResource;
 use App\Http\Resources\ApartmentResource\ApartmentScrollResource;
+use DomainException;
 
 class UserController extends Controller
 {
@@ -40,6 +41,35 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $favouriteApartments_resource
+        ], 200);
+    }
+
+    public function addFavouriteApartment(Request $request , int $apartmentId)
+    {
+        try
+        {
+            $this->userService->addFavouriteApartment($request->user()->id, $apartmentId);
+
+            return response()->json([
+                'message' => 'Apartment added to favourites'
+            ], 200);
+        }
+        catch(DomainException $e)
+        {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 409);
+        }
+    }
+
+    public function removeFavouriteApartment(Request $request , int $apartmentId)
+    {
+        Log::info('Controller remove favourite apartment', ['user_id' => $request->user()->id, 'apartment_id' => $apartmentId]);
+
+        $isRemoved = $this->userService->removeFavouriteApartment($request->user()->id, $apartmentId);
+
+        return response()->json([
+            'message' => 'Apartment removed from favourites'
         ], 200);
     }
 }

@@ -29,6 +29,7 @@ Route::prefix('/admin')
         Route::patch('registers/{id}' , [AdminController::class , 'acceptRegister']); 
     });
 
+
 Route::prefix('/user')
     ->middleware('auth:sanctum')
     ->group(function()
@@ -36,9 +37,9 @@ Route::prefix('/user')
         Route::get('/profile' , [UserController::class , 'getProfile']);
 
         Route::get('/favourites' , [UserController::class , 'getFavouriteApartments']);
-        Route::post('/favourites/{id}' , [UserController::class , 'addFavouriteApartment']); // not implemented
-        Route::delete('/favourites/{id}' , [UserController::class , 'removeFavouriteApartment']); // not implemented
+        Route::post('/favourites/{apartmentId}' , [UserController::class , 'addFavouriteApartment']);
+        Route::delete('/favourites/{apartmentId}' , [UserController::class , 'removeFavouriteApartment']);
 
-        Route::post('/rates/{id}' , [UserController::class , 'rateApartment']); // not implemented
+        Route::post('/rates/{apartmentId}' , [UserController::class , 'rateApartment']); // not implemented
     });
-    
+ 

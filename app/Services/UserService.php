@@ -5,18 +5,23 @@ namespace App\Services;
 use App\Models\User;
 use App\Repositories\UserRepo;
 use App\Repositories\FavouriteRepo;
+use App\Repositories\ApartmentRepo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
+use App\Models\FavouriteApartment;
+use DomainException;
 
 class UserService
 {
     private UserRepo $userRepo;
     private FavouriteRepo $favouriteRepo;
+    private ApartmentRepo $apartmentRepo;
 
-    public function __construct(UserRepo $userRepo, FavouriteRepo $favouriteRepo)
+    public function __construct(UserRepo $userRepo, FavouriteRepo $favouriteRepo, ApartmentRepo $apartmentRepo)
     {
         $this->userRepo = $userRepo;
         $this->favouriteRepo = $favouriteRepo;
+        $this->apartmentRepo = $apartmentRepo;
     }
 
     public function getAllRegisters()
@@ -132,6 +137,8 @@ class UserService
 
         return $user;
     }
+
+
     public function getFavouriteApartments(int $id)
     {
         Log::info('UserService getFavouriteApartments called for id: ' . $id);
@@ -141,5 +148,39 @@ class UserService
         Log::info('UserService getFavouriteApartments retrieved ' . $favouriteApartments->count() . ' favourite apartments');
 
         return $favouriteApartments;
+    }
+
+    public function addFavouriteApartment(int $userId, int $apartmentId)
+    {
+        Log::info('UserService addFavouriteApartment called for user id: ' . $userId . ' and apartment id: ' . $apartmentId);
+
+        $this->apartmentRepo->getApartmentById($apartmentId); // check if apartment exists and throw exception if not
+
+        $isFavourite = $this->favouriteRepo->isFavourite($userId, $apartmentId);
+
+        if($isFavourite)
+        {
+            Log::warning('UserService addFavouriteApartment apartment already in favourites for user id: ' . $userId . ' and apartment id: ' . $apartmentId);
+            throw new DomainException('Apartment already in favourites');
+        }
+        
+        $result = $this->favouriteRepo->addFavourite($userId, $apartmentId); 
+
+        return $result;
+    }
+
+    public function removeFavouriteApartment(int $userId, int $apartmentId)
+    {
+        Log::info('UserService removeFavouriteApartment called for user id: ' . $userId . ' and apartment id: ' . $apartmentId);
+
+        $result = $this->favouriteRepo->removeFavourite($userId, $apartmentId);
+
+        if (!$result) 
+        {
+            Log::warning('UserService removeFavouriteApartment failed to remove favourite apartment for user id: ' . $userId . ' and apartment id: ' . $apartmentId);
+            throw (new ModelNotFoundException())->setModel(FavouriteApartment::class , $userId , $apartmentId);
+        }
+
+        return $result;
     }
 }

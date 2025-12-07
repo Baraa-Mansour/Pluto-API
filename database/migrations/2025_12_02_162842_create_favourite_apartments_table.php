@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('apartment_id')->constrained('apartments')->onDelete('cascade');
+
+            $table->unique(['user_id', 'apartment_id']);
         });
     }
 
