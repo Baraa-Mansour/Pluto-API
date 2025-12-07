@@ -4,16 +4,19 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\UserRepo;
+use App\Repositories\FavouriteRepo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 
 class UserService
 {
     private UserRepo $userRepo;
+    private FavouriteRepo $favouriteRepo;
 
-    public function __construct(UserRepo $userRepo)
+    public function __construct(UserRepo $userRepo, FavouriteRepo $favouriteRepo)
     {
         $this->userRepo = $userRepo;
+        $this->favouriteRepo = $favouriteRepo;
     }
 
     public function getAllRegisters()
@@ -133,7 +136,7 @@ class UserService
     {
         Log::info('UserService getFavouriteApartments called for id: ' . $id);
 
-        $favouriteApartments = $this->userRepo->getFavouriteApartments($id);
+        $favouriteApartments = $this->favouriteRepo->getFavouriteApartments($id);
 
         Log::info('UserService getFavouriteApartments retrieved ' . $favouriteApartments->count() . ' favourite apartments');
 

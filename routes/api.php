@@ -34,6 +34,11 @@ Route::prefix('/user')
     ->group(function()
     {
         Route::get('/profile' , [UserController::class , 'getProfile']);
+
         Route::get('/favourites' , [UserController::class , 'getFavouriteApartments']);
+        Route::post('/favourites/{id}' , [UserController::class , 'addFavouriteApartment']); // not implemented
+        Route::delete('/favourites/{id}' , [UserController::class , 'removeFavouriteApartment']); // not implemented
+
+        Route::post('/rates/{id}' , [UserController::class , 'rateApartment']); // not implemented
     });
     

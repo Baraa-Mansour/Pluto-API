@@ -97,19 +97,6 @@ class UserRepo
         return $exists;
     }
 
-    public function getFavouriteApartments(int $id)
-    {
-        Log::info('UserRepo getFavouriteApartments called for id: ' . $id);
-
-        $favouriteApartments = User::with(['favouriteApartments.city.governorate', 'favouriteApartments.rates'])
-                                    ->findOrFail($id)
-                                    ->favouriteApartments()->where('is_deleted', false)->get();
-
-        Log::info('UserRepo getFavouriteApartments retrieved ' . $favouriteApartments->count() . ' favourite apartments');
-
-        return $favouriteApartments;
-    }
-
     
     public function getRegisters()
     {
@@ -146,6 +133,7 @@ class UserRepo
         return $users;
     }
 
+    
     // for report but need optimization if have time
     public function countUsers() : int
     {
