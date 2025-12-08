@@ -4,6 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ApartmentController;
+use App\Http\Controllers\GovernorateController;
+use App\Http\Controllers\CityController;
+
 use Illuminate\Support\Facades\Route;
 
 
@@ -52,3 +55,16 @@ Route::prefix('/apartments')
         Route::get('/' , [ApartmentController::class , 'getApartmentsWithFilters']);
         Route::get('/{apartmentId}' , [ApartmentController::class , 'getApartmentById']);
     });
+
+
+Route::prefix('/governorates')
+    ->middleware('auth:sanctum')
+    ->group(function()
+    {
+        Route::get('/' , [GovernorateController::class , 'getAllGovernorates']);
+        Route::get('/{governorateId}/cities' , [GovernorateController::class , 'getGovernorateCities']);
+    });
+
+
+Route::get('/cities' , [CityController::class , 'getAllCities']);
+
