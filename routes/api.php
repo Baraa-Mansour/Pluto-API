@@ -66,5 +66,5 @@ Route::prefix('/governorates')
     });
 
 
-Route::get('/cities' , [CityController::class , 'getAllCities']);
+Route::get('/cities' , [CityController::class , 'getAllCities'])->middleware('auth:sanctum');
 
