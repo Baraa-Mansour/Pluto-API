@@ -11,7 +11,7 @@ class ApartmentRepo
     {
         Log::info('ApartmentRepo getApartmentById called for id: ' . $id);
 
-        $apartment = Apartment::with('city.governorate')->findOrFail($id);
+        $apartment = Apartment::with('city.governorate' , 'rates')->findOrFail($id);
 
         return $apartment;
     }
@@ -26,7 +26,7 @@ class ApartmentRepo
     {
         Log::info('ApartmentRepo getAllApartmentsWithFilters called');
 
-        $apartments = Apartment::with('city.governorate')
+        $apartments = Apartment::with('city.governorate' , 'rates')
         ->when($filters['governorate_id'] ?? null, fn($q, $id) =>
             $q->whereHas('city.governorate', fn($q2) => $q2->where('id', $id))
         )

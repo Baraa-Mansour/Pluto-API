@@ -23,6 +23,7 @@ class ApartmentDetailResource extends JsonResource
             'rooms' => $this->rooms,
             'description' => $this->description,
             'photo' => $this->photo_url,
+            'rate' => $this->rates->avg('rate') ?? 0,
         ];
     }
 }
