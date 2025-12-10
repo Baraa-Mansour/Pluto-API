@@ -46,4 +46,11 @@ class ApartmentRepo
 
         return $apartments;
     }
+
+    public function createApartment(Apartment $apartment)
+    {
+        Log::info('ApartmentRepo createApartment called');
+
+        return $apartment->save();
+    }
 }

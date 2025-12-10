@@ -26,8 +26,8 @@ class RegisterRequest extends FormRequest
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'password' => 'required|string|min:8',
-            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:3072',
-            'id_image' => 'required|image|mimes:jpeg,png,jpg|max:3072',
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'id_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'birth_date' => 'required|date|before_or_equal:18 years ago',
         ];
     }

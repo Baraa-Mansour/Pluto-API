@@ -44,7 +44,6 @@ Route::prefix('/user')
         Route::post('/favourites/{apartmentId}' , [UserController::class , 'addFavouriteApartment']);
         Route::delete('/favourites/{apartmentId}' , [UserController::class , 'removeFavouriteApartment']);
 
-        Route::post('/rates/{apartmentId}' , [UserController::class , 'rateApartment']); // not implemented
     });
  
 
@@ -54,6 +53,10 @@ Route::prefix('/apartments')
     {
         Route::get('/' , [ApartmentController::class , 'getApartmentsWithFilters']);
         Route::get('/{apartmentId}' , [ApartmentController::class , 'getApartmentById']);
+
+        Route::post('/' , [ApartmentController::class , 'createApartment']);
+
+        Route::post('/{apartmentId}/ratings' , [ApartmentController::class , 'rateApartment']); // not implemented
     });
 
 

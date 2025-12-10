@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ApartmentsRequest\ApartmentFilterRequest;
 use App\Http\Resources\ApartmentResource\ApartmentScrollResource;
 use App\Http\Resources\ApartmentResource\ApartmentDetailResource;
+use App\Http\Requests\ApartmentsRequest\ApartmentCreateRequest;
 use App\Services\ApartmentService;
 use Illuminate\Support\Facades\Log;
 
@@ -38,6 +39,18 @@ class ApartmentController extends Controller
 
         return response()->json([
             'data' => $apartment_resource,
+        ]);
+    }
+    public function createApartment(ApartmentCreateRequest $request)
+    {
+        Log::info('ApartmentController createApartment called');
+
+        $validated = $request->validated();
+
+        $this->apartmentService->createApartment($validated ,$request->user()->id);
+        
+        return response()->json([
+            'message' => 'Apartment created successfully',
         ]);
     }
 }
