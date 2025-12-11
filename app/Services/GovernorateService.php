@@ -11,9 +11,9 @@ class GovernorateService
 {
     private GovernorateRepo $governorateRepo;
 
-    public function __construct()
+    public function __construct(GovernorateRepo $governorateRepo)
     {
-        $this->governorateRepo = new GovernorateRepo();
+        $this->governorateRepo = $governorateRepo;
     }
 
     public function getAllGovernorates()

@@ -9,9 +9,9 @@ class CityService
 {
     private CityRepo $cityRepo;
 
-    public function __construct()
+    public function __construct(CityRepo $cityRepo)
     {
-        $this->cityRepo = new CityRepo();
+        $this->cityRepo = $cityRepo;
     }
 
     public function getAllCities()

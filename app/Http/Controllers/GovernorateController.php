@@ -10,9 +10,9 @@ class GovernorateController extends Controller
 {
     private GovernorateService $governorateService;
 
-    public function __construct()
+    public function __construct(GovernorateService $governorateService)
     {
-        $this->governorateService = new GovernorateService();
+        $this->governorateService = $governorateService;
     }
 
     public function getAllGovernorates()

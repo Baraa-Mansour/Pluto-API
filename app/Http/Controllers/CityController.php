@@ -9,9 +9,9 @@ class CityController extends Controller
 {
     private CityService $cityService;
 
-    public function __construct()
+    public function __construct(CityService $cityService)
     {
-        $this->cityService = new CityService();
+        $this->cityService = $cityService;
     }
 
     public function getAllCities()

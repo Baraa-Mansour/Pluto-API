@@ -6,7 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\GovernorateController;
 use App\Http\Controllers\CityController;
-
+use App\Http\Controllers\PaymentMethodController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -70,4 +70,5 @@ Route::prefix('/governorates')
 
 
 Route::get('/cities' , [CityController::class , 'getAllCities'])->middleware('auth:sanctum');
+Route::get('/paymentMethods' , [PaymentMethodController::class , 'getAllPaymentMethods'])->middleware('auth:sanctum');
 
