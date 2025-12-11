@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             ApartmentSeeder::class,
             FavouriteApartmentSeeder::class,
             RateSeeder::class,
-            PaymentMethodSeeder::class
+            PaymentMethodSeeder::class,
+            BookingSeeder::class
         ]);
     }
 }
