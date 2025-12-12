@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ApartmentController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GovernorateController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\PaymentMethodController;
@@ -69,6 +70,13 @@ Route::prefix('/governorates')
     });
 
 
+Route::prefix('/bookings')
+    ->middleware('auth:sanctum')
+    ->group(function()
+    {
+        Route::post('/' , [BookingController::class, 'createBooking']);
+    });
+
+
 Route::get('/cities' , [CityController::class , 'getAllCities'])->middleware('auth:sanctum');
 Route::get('/paymentMethods' , [PaymentMethodController::class , 'getAllPaymentMethods'])->middleware('auth:sanctum');
-
