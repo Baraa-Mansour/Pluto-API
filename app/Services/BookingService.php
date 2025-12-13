@@ -57,6 +57,24 @@ class BookingService
         return $this->bookingRepo->acceptBookingAndDeclineOthers($booking);
     }
 
+    public function declineBooking(int $bookingId)
+    {
+        Log::info('BookingService declineBooking called');
+
+        $booking = $this->bookingRepo->findBookingById($bookingId);
+
+        if($booking->status !== Booking::STATUS_REGISTERED)
+        {
+            Log::error('BookingService declineBooking condition failed');
+
+            throw new DomainException('This booking already proceed');
+        }
+
+        $booking->status = Booking::STATUS_DECLINED;
+
+        return $this->bookingRepo->saveBooking($booking);
+    }
+
     
     private function validBookingToAccept(Booking $booking)
     {

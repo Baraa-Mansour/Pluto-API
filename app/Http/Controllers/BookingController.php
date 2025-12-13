@@ -61,4 +61,26 @@ class BookingController extends Controller
             ], 422);
         }
     }
+
+    public function declineBooking(int $apartmentId)
+    {
+        try
+        {
+            Log::info('BookingController declineBooking called');
+
+            $isDeclined = $this->bookingService->declineBooking($apartmentId);
+
+            return response()->json([
+                'message' => 'Declined successfully'
+            ], 200);
+        }
+        catch(DomainException $e)
+        {
+            Log::error('BookingController declineBooking failed. Error: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
 }

@@ -50,6 +50,13 @@ class BookingRepo
         return true;
     }
 
+    public function saveBooking(Booking $booking)
+    {
+        Log::info('BookingService saveBooking called');
+
+        return $booking->save();
+    }
+
     // check if apartment booked in date or user have registered
     public function isBookingAccepted(int $apartmentId, int $userId, $fromDate, $toDate)
     {
