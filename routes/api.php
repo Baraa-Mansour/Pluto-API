@@ -8,7 +8,6 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GovernorateController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\PaymentMethodController;
-use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 
 

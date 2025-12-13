@@ -75,10 +75,41 @@ class BookingService
         return $this->bookingRepo->saveBooking($booking);
     }
 
+    public function cancelBooking(int $bookingId)
+    {   
+        Log::info('BookingService cancelBookiing called');
+
+        $booking = $this->bookingRepo->findBookingById($bookingId);
+
+        if(!$this->validBookingToCancel($booking))
+        {
+            Log::error('BookingService cancelBooking condition failed');
+
+            throw new DomainException('This booking is already declined/canceled or currently in use');
+        }
+
+        $booking->status = Booking::STATUS_CANCELED;
+
+        return $this->bookingRepo->saveBooking($booking);
+    }
     
+    private function validBookingToCancel(Booking $booking)
+    {
+        Log::info('BookingService validBookingToCancel called');
+
+        $bookingStartDate = Carbon::parse($booking->from_date)->subDay();
+
+        $isValid = $booking->status !== Booking::STATUS_DECLINED && 
+                   $booking->status !== Booking::STATUS_CANCELED &&
+                   $bookingStartDate->gt(Carbon::today());
+                   
+        return $isValid;        
+    }
     private function validBookingToAccept(Booking $booking)
     {
-        $bookingStartDate = Carbon::parse($booking->from_date);
+        Log::info('BookingService validBookingToAccept called');
+
+        $bookingStartDate = Carbon::parse($booking->from_date)->subDay();
 
         $isAccepted = $booking->status === Booking::STATUS_REGISTERED && $bookingStartDate->gt(Carbon::today());
 
