@@ -39,4 +39,26 @@ class BookingController extends Controller
             ], 409);
         }
     }
+
+    public function acceptBooking(int $apartmentId)
+    {
+        try
+        {
+            Log::info('BookingController acceptBooking called');
+
+            $isAccepted = $this->bookingService->acceptBooking($apartmentId);
+
+            return response()->json([
+                'message' => 'Accepted successfully'
+            ], 200);
+        }
+        catch(DomainException $e)
+        {
+            Log::error('BookingController acceptBooking failed. Error: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
 }

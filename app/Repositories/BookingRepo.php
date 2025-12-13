@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Booking;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -23,6 +22,32 @@ class BookingRepo
         Log::info('BookingRepo createBooking called');
 
         return $booking->save();
+    }
+
+    public function findBookingById(int $id)
+    {
+        Log::info('BookingRepo findBookingById called');
+
+        return Booking::findOrFail($id);
+    }
+
+    public function acceptBookingAndDeclineOthers(Booking $booking)
+    {
+        Log::info('BookingRepo acceptBookingAndDecclindeOthers');
+
+        DB::transaction(function () use ($booking) {
+            // accept this booking
+            $booking->save();
+    
+            // decline all others with same apartment and on range date
+            Booking::where('apartment_id', $booking->apartment_id)
+                ->where('from_date', '<=' ,$booking->to_date)
+                ->where('to_date' , '>=' , $booking->from_date)
+                ->where('id', '!=', $booking->id)
+                ->update(['status' => 'declined']);
+        });
+
+        return true;
     }
 
     // check if apartment booked in date or user have registered

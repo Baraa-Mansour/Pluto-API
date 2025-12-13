@@ -77,7 +77,7 @@ Route::prefix('/bookings')
     {
         Route::post('/' , [BookingController::class, 'createBooking']);
 
-        Route::patch('/{bookingId}/accept', [BookingController::class, 'acceptBooking'])->middleware('OwnerCheck'); // not implemented
+        Route::patch('/{bookingId}/accept', [BookingController::class, 'acceptBooking'])->middleware('OwnerCheck');
         Route::patch('/{bookingId}/decline', [BookingController::class, 'declineBooking'])->middleware('OwnerCheck'); // not implemented
     });
 

@@ -37,7 +37,7 @@ class BookingRegisterRequest extends FormRequest
                     });
                 }),
             ], // check if apartment deleted
-            'from_date' => 'required|date|after_or_equal:today',
+            'from_date' => 'required|date|after:today',
             'to_date' => 'required|date|after_or_equal:from_date',
             'payment_method_id' => 'required|exists:payment_methods,id'
         ];

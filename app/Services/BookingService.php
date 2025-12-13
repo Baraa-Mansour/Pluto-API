@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Repositories\BookingRepo;
 use DomainException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class BookingService
@@ -38,7 +39,33 @@ class BookingService
         return $this->bookingRepo->createBooking($booking);
     }
 
+    public function acceptBooking(int $bookingId)
+    {
+        Log::info('BookingService acceptBooking called');
 
+        $booking = $this->bookingRepo->findBookingById($bookingId);
+
+        if(!$this->validBookingToAccept($booking))
+        {
+            Log::error('BookingService acceptBooking condition failed');
+
+            throw new DomainException('This booking already proceed or its expire');
+        }
+
+        $booking->status = Booking::STATUS_ACCEPTED;
+
+        return $this->bookingRepo->acceptBookingAndDeclineOthers($booking);
+    }
+
+    
+    private function validBookingToAccept(Booking $booking)
+    {
+        $bookingStartDate = Carbon::parse($booking->from_date);
+
+        $isAccepted = $booking->status === Booking::STATUS_REGISTERED && $bookingStartDate->gt(Carbon::today());
+
+        return $isAccepted;
+    }
     private function getBookingInstanceFromData(array $data , int $userId)
     {
         $booking = new Booking();

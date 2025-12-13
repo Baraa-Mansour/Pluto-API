@@ -18,7 +18,7 @@ class OwnerMiddleware
     {
         $bookingWithApartment = Booking::with('apartment')->findOrFail($request->route('bookingId'));
         
-        if($request->user()->id() !== $bookingWithApartment->apartment->user_id)
+        if($request->user()->id !== $bookingWithApartment->apartment->user_id)
         {
             return response()->json([
                 'message' => 'Unauthorized'
@@ -28,3 +28,4 @@ class OwnerMiddleware
         return $next($request);
     }
 }
+    
