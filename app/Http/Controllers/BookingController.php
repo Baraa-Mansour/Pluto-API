@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BookingRequest\BookingRegisterRequest;
+use App\Http\Resources\BookingResource\BookingsForUserResource;
 use App\Services\BookingService;
 use DomainException;
 use Illuminate\Http\Request;
@@ -15,6 +16,19 @@ class BookingController extends Controller
     public function __construct(BookingService $bookingService)
     {
         $this->bookingService = $bookingService;
+    }
+
+    public function getAllUserBookings(Request $request)
+    {
+        Log::info('BookingController getAllUserBookings Called');
+
+        $bookings = $this->bookingService->getAllUserBookings($request->user()->id);
+
+        $bookings_resource = BookingsForUserResource::collection($bookings);
+
+        return response()->json([
+            'data' => $bookings_resource
+        ], 200);
     }
 
     public function createBooking(BookingRegisterRequest $request)

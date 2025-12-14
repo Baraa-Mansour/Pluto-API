@@ -31,6 +31,15 @@ class BookingRepo
         return Booking::findOrFail($id);
     }
 
+    public function getAllUserBookings(int $userId)
+    {
+        Log::info('BookingRepo getAllUserBookings Called');
+
+        $bookings = Booking::with('apartment')->where('user_id', $userId)->get();
+
+        return $bookings;
+    }
+
     public function acceptBookingAndDeclineOthers(Booking $booking)
     {
         Log::info('BookingRepo acceptBookingAndDecclindeOthers');

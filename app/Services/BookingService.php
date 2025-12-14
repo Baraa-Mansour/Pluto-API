@@ -18,6 +18,15 @@ class BookingService
     }
 
 
+    public function getAllUserBookings(int $userId)
+    {
+        Log::info('BookingService getAllUserBookings Called');
+
+        $bookings = $this->bookingRepo->getAllUserBookings($userId);
+
+        return $bookings;
+    }
+
     public function createBooking(array $data, int $userId)
     {
         Log::info('BookingService createBooking Called');

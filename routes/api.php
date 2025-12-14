@@ -74,6 +74,7 @@ Route::prefix('/bookings')
     ->middleware('auth:sanctum')
     ->group(function()
     {
+        Route::get('/' , [BookingController::class, 'getAllUserBookings']);
         Route::post('/' , [BookingController::class, 'createBooking']);
 
         Route::patch('/{bookingId}/accept', [BookingController::class, 'acceptBooking'])->middleware('OwnerCheck');
