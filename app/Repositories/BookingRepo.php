@@ -82,6 +82,18 @@ class BookingRepo
                ->where('from_date', '>', now())
                ->update(['status' => Booking::STATUS_CANCELED]);
     }
+    public function declineFutureBookingsForOwner(int $userId)
+    {
+        Log::info('BookingRepo declineFutureRegistrationForOwner called');
+
+        Booking::whereHas('apartment', function ($query) use ($userId) 
+                {
+                        $query->where('user_id', $userId);
+                })
+                ->whereIn('status', [Booking::STATUS_REGISTERED, Booking::STATUS_ACCEPTED])
+                ->where('from_date', '>', now())                
+                ->update(['status' => Booking::STATUS_DECLINED]);
+    }
 
     public function saveBooking(Booking $booking)
     {

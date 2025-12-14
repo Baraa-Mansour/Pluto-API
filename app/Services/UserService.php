@@ -154,6 +154,8 @@ class UserService
 
             $this->bookingRepo->cancelFutureBookingsForUser($user->id);
 
+            $this->bookingRepo->declineFutureBookingsForOwner($user->id);
+
             $this->userRepo->softDeleteUser($user->id);
         });
 
