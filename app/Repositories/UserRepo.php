@@ -49,6 +49,19 @@ class UserRepo
         return (bool)$isDeleted;
     }
 
+    public function softDeleteUser(int $id)
+    {
+        Log::info('UserRepo softDeleteUser called for id: ' . $id);
+
+        $user = User::findOrFail($id);
+        $user->status = User::STATUS_DELETED;
+
+        $isDeleted = $user->save();
+
+        Log::info('UserRepo softDeleteUser ' . ($isDeleted ? 'success' : 'failed') . ' for id: ' . $id);
+
+        return (bool)$isDeleted;
+    }
 
     public function findByPhone(string $phone): ?User
     {

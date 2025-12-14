@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\UserService;
 use App\Http\Resources\UserResource\UserBasicInfoResource;
 use App\Http\Resources\UserResource\UserRegisterResource;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -88,6 +89,20 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'User register accepted successfully'
+        ], 200);
+    }
+
+
+    public function deleteUser(int $id)
+    {
+        Log::info('AdminController deleteUser called');
+
+        $user = User::where('id', $id)->where('status', '!=', User::STATUS_DELETED)->firstOrFail();
+
+        $isDeleted = $this->userService->softDeleteUserWithFutureBookingsAndTokens($user);
+
+        return response()->json([
+            'message' => 'User deleted successfully'
         ], 200);
     }
 }

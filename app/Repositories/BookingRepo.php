@@ -73,6 +73,16 @@ class BookingRepo
         return true;
     }
 
+    public function cancelFutureBookingsForUser(int $userId)
+    {
+        Log::info('BookingRepo cancelFutureBookingsForUser called');
+
+        Booking::where('user_id', $userId)
+               ->whereIn('status', [Booking::STATUS_ACCEPTED,Booking::STATUS_REGISTERED])
+               ->where('from_date', '>', now())
+               ->update(['status' => Booking::STATUS_CANCELED]);
+    }
+
     public function saveBooking(Booking $booking)
     {
         Log::info('BookingService saveBooking called');

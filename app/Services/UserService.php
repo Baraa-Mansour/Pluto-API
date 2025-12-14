@@ -10,19 +10,24 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use App\Models\FavouriteApartment;
 use App\Models\Apartment;
+use App\Repositories\BookingRepo;
 use DomainException;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
     private UserRepo $userRepo;
     private FavouriteRepo $favouriteRepo;
     private ApartmentRepo $apartmentRepo;
+    private BookingRepo $bookingRepo;
 
-    public function __construct(UserRepo $userRepo, FavouriteRepo $favouriteRepo, ApartmentRepo $apartmentRepo)
+    public function __construct(UserRepo $userRepo, FavouriteRepo $favouriteRepo,ApartmentRepo $apartmentRepo,
+    BookingRepo $bookingRepo)
     {
         $this->userRepo = $userRepo;
         $this->favouriteRepo = $favouriteRepo;
         $this->apartmentRepo = $apartmentRepo;
+        $this->bookingRepo = $bookingRepo;
     }
 
     public function getAllRegisters()
@@ -138,6 +143,22 @@ class UserService
 
         return $user;
     }
+
+    public function softDeleteUserWithFutureBookingsAndTokens(User $user)
+    {
+        Log::info('UserService deleteUserWithFutureBookingsAndTokens called');
+
+        DB::transaction(function () use($user)
+        {
+            $user->tokens()->delete();
+
+            $this->bookingRepo->cancelFutureBookingsForUser($user->id);
+
+            $this->userRepo->softDeleteUser($user->id);
+        });
+
+        return true;
+    } 
 
 
     public function getFavouriteApartments(int $id)
