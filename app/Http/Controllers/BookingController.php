@@ -31,6 +31,19 @@ class BookingController extends Controller
         ], 200);
     }
 
+    public function getOwnerRegistrations(Request $request)
+    {
+        Log::info('BookingController getOwnerRegistrations called');
+
+        $registration = $this->bookingService->getOwnerRegistrations($request->user()->id);
+
+        $registration_resource = BookingsForUserResource::collection($registration);
+
+        return response()->json([
+            'data' => $registration_resource
+        ], 200);
+    }
+
     public function createBooking(BookingRegisterRequest $request)
     {
         try

@@ -40,6 +40,20 @@ class BookingRepo
         return $bookings;
     }
 
+    public function getOwnerRegistrations(int $ownerId)
+    {
+        Log::info('BookingRepo getOwnerRegistrations called');
+
+        $registration = Booking::with('apartment')
+                        ->where('status', Booking::STATUS_REGISTERED)
+                        ->whereHas('apartment', function ($query) use ($ownerId) 
+                        {
+                            $query->where('user_id', $ownerId);
+                        })->get();
+
+        return $registration;
+    }
+
     public function acceptBookingAndDeclineOthers(Booking $booking)
     {
         Log::info('BookingRepo acceptBookingAndDecclindeOthers');

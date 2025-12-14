@@ -27,6 +27,15 @@ class BookingService
         return $bookings;
     }
 
+    public function getOwnerRegistrations(int $ownerId)
+    {
+        Log::info('BookingService getOwnerRegistrations called');
+
+        $registration = $this->bookingRepo->getOwnerRegistrations($ownerId);
+
+        return $registration;
+    }
+
     public function createBooking(array $data, int $userId)
     {
         Log::info('BookingService createBooking Called');

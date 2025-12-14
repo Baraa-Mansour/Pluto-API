@@ -77,6 +77,7 @@ Route::prefix('/bookings')
         Route::get('/' , [BookingController::class, 'getAllUserBookings']);
         Route::post('/' , [BookingController::class, 'createBooking']);
 
+        Route::get('/registrations', [BookingController::class, 'getOwnerRegistrations']);
         Route::patch('/{bookingId}/accept', [BookingController::class, 'acceptBooking'])->middleware('OwnerCheck');
         Route::patch('/{bookingId}/decline', [BookingController::class, 'declineBooking'])->middleware('OwnerCheck');
 
