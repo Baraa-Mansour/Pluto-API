@@ -79,7 +79,7 @@ class BookingRepo
 
         Booking::where('user_id', $userId)
                ->whereIn('status', [Booking::STATUS_ACCEPTED,Booking::STATUS_REGISTERED])
-               ->where('from_date', '>', now())
+               ->where('from_date', '>', now()->subDay())
                ->update(['status' => Booking::STATUS_CANCELED]);
     }
     public function declineFutureBookingsForOwner(int $userId)
@@ -91,7 +91,7 @@ class BookingRepo
                         $query->where('user_id', $userId);
                 })
                 ->whereIn('status', [Booking::STATUS_REGISTERED, Booking::STATUS_ACCEPTED])
-                ->where('from_date', '>', now())                
+                ->where('from_date', '>', now()->subDay())                
                 ->update(['status' => Booking::STATUS_DECLINED]);
     }
 
@@ -100,6 +100,19 @@ class BookingRepo
         Log::info('BookingService saveBooking called');
 
         return $booking->save();
+    }
+
+    public function haveCompletedBookingForApartment(int $userId, int $apartmentId)
+    {
+        Log::info('BookingRepo haveCompletedBookingForApartment called');
+
+        $haveBooking = Booking::where('user_id', $userId)
+                              ->where('apartment_id', $apartmentId)
+                              ->where('to_date', '<', now()->subDay())
+                              ->where('status', Booking::STATUS_ACCEPTED)
+                              ->exists();
+                              
+        return $haveBooking;
     }
 
     // check if apartment booked in date or user have registered

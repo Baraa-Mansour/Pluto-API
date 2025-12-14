@@ -2,20 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ApartmentRequest\ApartmentRateRequest;
 use App\Http\Requests\ApartmentsRequest\ApartmentFilterRequest;
 use App\Http\Resources\ApartmentResource\ApartmentScrollResource;
 use App\Http\Resources\ApartmentResource\ApartmentDetailResource;
 use App\Http\Requests\ApartmentsRequest\ApartmentCreateRequest;
+use App\Models\Apartment;
 use App\Services\ApartmentService;
+use App\services\RateService;
+use DomainException;
 use Illuminate\Support\Facades\Log;
 
 class ApartmentController extends Controller
 {
-    private $apartmentService;
+    private ApartmentService $apartmentService;
+    private RateService $rateService;
 
-    public function __construct(ApartmentService $apartmentService)
+    public function __construct(ApartmentService $apartmentService, RateService $rateService)
     {
         $this->apartmentService = $apartmentService;
+        $this->rateService = $rateService;
     }
 
     public function getApartmentsWithFilters(ApartmentFilterRequest $request)
@@ -52,5 +58,29 @@ class ApartmentController extends Controller
         return response()->json([
             'message' => 'Apartment created successfully',
         ]);
+    }
+    public function rateApartment(ApartmentRateRequest $request, int $apartmentId)
+    {
+        Log::error('ApartmentController rateApartment called');
+        Apartment::findOrFail($apartmentId);
+        
+        try
+        {
+            $validated = $request->validated();
+
+            $isRated = $this->rateService->rateApartment($request->user()->id,$apartmentId,$validated['rate']);
+
+            return response()->json([
+                'message' => 'Apartment rated successfully'
+            ], 200);
+        }
+        catch(DomainException $ex)
+        {
+            Log::error('ApartmentController rateApartment failed');
+
+            return response()->json([
+                'message' => $ex->getMessage()
+            ], 422);
+        }
     }
 }
