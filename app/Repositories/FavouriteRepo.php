@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\FavouriteApartment;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 
@@ -14,8 +15,10 @@ class FavouriteRepo
         Log::info('FavouriteRepo getFavouriteApartments called for id: ' . $id);
 
         $favouriteApartments = FavouriteApartment::where('user_id', $id)
-                                ->wherehas('apartment', function($query) {
-                                    $query->where('is_deleted', false);
+                                ->whereHas('apartment', function ($query) {
+                                    $query->whereHas('user', function ($ownerQuery) {
+                                        $ownerQuery->where('status', '!=', User::STATUS_DELETED);
+                                    });
                                 })
                                 ->with('apartment.city.governorate', 'apartment.rates')
                                 ->get()

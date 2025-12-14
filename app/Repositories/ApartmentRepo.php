@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Apartment;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class ApartmentRepo
@@ -42,7 +43,10 @@ class ApartmentRepo
         ->when($filters['rooms'] ?? null, fn($q, $rooms) =>
             $q->where('rooms', $rooms)
         )
-        ->where('is_deleted', false)->get();
+        ->whereHas('user', fn($q) =>
+            $q->where('status', '!=', User::STATUS_DELETED)
+        )
+        ->get();
 
         return $apartments;
     }
