@@ -28,7 +28,7 @@ class ApartmentFactory extends Factory
             'rooms' => $this->faker->numberBetween(1, 5),
             'floor' => $this->faker->numberBetween(1, 20),
             'description' => $this->faker->paragraph(1),// fix it to not long string(100),            
-            'price' => $this->faker->randomFloat(2, 1000000, 3500000),
+            'price' => $this->faker->randomFloat(2, 50000, 175000),
             'photo' => 'apartment_images/home.jpg',
             'is_deleted' => false
         ];
