@@ -66,4 +66,22 @@ class UpdateRequestController extends Controller
             'data' => $request_resource
         ], 200);
     }
+
+    public function deleteUpdate(Request $request, int $updateRequestId)
+    {
+        $updateRequest = $this->updateRequestService->getUpdateRequestById($updateRequestId);
+
+        if($request->user()->id !== $updateRequest->booking->apartment->user_id)
+        {
+            return response()->json([
+                'message' => 'UnAuthorize'
+            ], 403);
+        }
+
+        $updateRequest->delete();
+
+        return response()->json([
+            'message' => 'deleted successfully'
+        ], 200);
+    }
 }

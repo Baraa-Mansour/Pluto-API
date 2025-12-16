@@ -67,4 +67,11 @@ class UpdateRequestService
                             })
                             ->get();
     }
+
+    public function getUpdateRequestById(int $updateRequestId)
+    {
+        return UpdateRequest::with('booking.apartment')
+                            ->where('id', $updateRequestId)
+                            ->firstOrFail();
+    }
 }

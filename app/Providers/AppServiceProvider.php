@@ -24,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
         Route::pattern('apartmentId', '[1-9][0-9]*');
         Route::pattern('governorateId', '[1-9][0-9]*');
         Route::pattern('bookingId', '[1-9][0-9]*');
+        Route::pattern('updateRequestId', '[1-9][0-9]*');
     }
 }
