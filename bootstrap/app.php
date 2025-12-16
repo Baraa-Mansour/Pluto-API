@@ -20,8 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'catch.exceptions' => CatchExceptionsMiddleware::class,
             'adminCheck' => AdminMiddleware::class,
-            'OwnerCheck' => OwnerMiddleware::class,
-            'BookingOwnerCheck' => BookingOwnerMiddleware::class
+            'apartmentOwnerCheck' => OwnerMiddleware::class,
+            'bookingOwnerCheck' => BookingOwnerMiddleware::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

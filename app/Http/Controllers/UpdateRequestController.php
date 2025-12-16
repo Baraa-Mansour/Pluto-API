@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\bookingRequest\UpdateBookingRequest;
+use App\Models\Booking;
+use App\Services\UpdateRequestService;
+use DomainException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+
+class UpdateRequestController extends Controller
+{
+    private UpdateRequestService $updateRequestService;
+
+    public function __construct(UpdateRequestService $updateRequestService)
+    {
+        $this->updateRequestService = $updateRequestService;
+    }
+
+    public function updateBookingRequest(UpdateBookingRequest $request)
+    {
+        Log::info('UpdateRequestController updateBookingRequest called');
+
+        $validated = $request->validated();
+
+        $booking = Booking::where('id', $request->route('bookingId'))
+                          ->where('from_date', '>', now())
+                          ->where('status', Booking::STATUS_ACCEPTED)
+                          ->firstOrFail();
+
+        $validated['new_from_date'] = Carbon::parse($validated['new_from_date']);
+        $validated['new_to_date']   = Carbon::parse($validated['new_to_date']);
+
+        $validated['booking'] = $booking;
+
+        try
+        {
+            $isUpdateRequestAdded = $this->updateRequestService->createUpdateBookingRequest($validated);
+
+            return response()->json([
+                'message' => 'Request added successfully'
+            ], 200);
+        }
+        catch(DomainException $ex)
+        {
+            Log::error('UpdateRequestController updateBookingRequest failed: ' . $ex->getMessage());
+
+            return response()->json([
+                'message' => $ex->getMessage()
+            ], 422);
+        }
+    }
+}

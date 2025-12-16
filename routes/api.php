@@ -8,6 +8,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GovernorateController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\UpdateRequestController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -80,11 +81,11 @@ Route::prefix('/bookings')
         Route::post('/' , [BookingController::class, 'createBooking']);
 
         Route::get('/registrations', [BookingController::class, 'getOwnerRegistrations']);
-        Route::patch('/{bookingId}/accept', [BookingController::class, 'acceptBooking'])->middleware('OwnerCheck');
-        Route::patch('/{bookingId}/decline', [BookingController::class, 'declineBooking'])->middleware('OwnerCheck');
+        Route::patch('/{bookingId}/accept', [BookingController::class, 'acceptBooking'])->middleware('apartmentOwnerCheck');
+        Route::patch('/{bookingId}/decline', [BookingController::class, 'declineBooking'])->middleware('apartmentOwnerCheck');
 
-        Route::patch('/{bookingId}/cancel' , [BookingController::class, 'cancelBooking'])->middleware('BookingOwnerCheck'); 
-
+        Route::patch('/{bookingId}/cancel' , [BookingController::class, 'cancelBooking'])->middleware('bookingOwnerCheck'); 
+        Route::put('/{bookingId}/update', [UpdateRequestController::class, 'updateBookingRequest'])->middleware('bookingOwnerCheck');
     });
 
 

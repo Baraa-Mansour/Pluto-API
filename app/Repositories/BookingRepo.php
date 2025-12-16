@@ -141,4 +141,20 @@ class BookingRepo
 
         return empty($result);
     }
+
+    
+    public function isApartmentBookedInDateFromAnother(int $apartmentId, int $bookingId, $fromDate, $toDate)
+    {
+        Log::info('BookingRepo isApartmentBookedInDateFromAnother called');
+
+        return Booking::where('id', '!=', $bookingId)
+                        ->where('apartment_id', $apartmentId)
+                        ->where(function ($q) use ($fromDate, $toDate) 
+                        {
+                            $q->where('from_date', '<=', $toDate)
+                            ->where('to_date', '>=', $fromDate);
+                        })
+                        ->where('status', Booking::STATUS_ACCEPTED)
+                        ->exists();
+    }
 }
