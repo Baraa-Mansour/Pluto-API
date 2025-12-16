@@ -52,4 +52,19 @@ class UpdateRequestService
 
         return $updateRequest->save();
     }
+
+    public function getOwnerUpdateRequest(int $ownerId)
+    {
+        return UpdateRequest::with('booking.apartment')
+                            ->where('new_from_date', '>', now())
+                            ->whereHas('booking', function ($query) 
+                            {
+                                $query->where('from_date', '>', now());
+                            })
+                            ->whereHas('booking.apartment', function ($query) use ($ownerId) 
+                            {
+                                $query->where('user_id', $ownerId);
+                            })
+                            ->get();
+    }
 }

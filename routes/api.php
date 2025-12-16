@@ -86,6 +86,10 @@ Route::prefix('/bookings')
 
         Route::patch('/{bookingId}/cancel' , [BookingController::class, 'cancelBooking'])->middleware('bookingOwnerCheck'); 
         Route::put('/{bookingId}/update', [UpdateRequestController::class, 'updateBookingRequest'])->middleware('bookingOwnerCheck');
+        
+        Route::get('/updateRequests', [UpdateRequestController::class, 'getUpdateRequests']);
+        Route::put('/updateRequests/{updateRequestId}', [UpdateRequestController::class, 'acceptUpdate']);
+        Route::delete('/updateRequests/{updateRequestId}', [UpdateRequestController::class, 'deleteUpdate']);
     });
 
 

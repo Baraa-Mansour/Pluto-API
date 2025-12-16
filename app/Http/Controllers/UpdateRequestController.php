@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\bookingRequest\UpdateBookingRequest;
+use App\Http\Resources\BookingResource\BookingUpdateRequestResource;
 use App\Models\Booking;
 use App\Services\UpdateRequestService;
 use DomainException;
@@ -51,5 +52,18 @@ class UpdateRequestController extends Controller
                 'message' => $ex->getMessage()
             ], 422);
         }
+    }
+
+    public function getUpdateRequests(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $updateRequests = $this->updateRequestService->getOwnerUpdateRequest($userId);
+
+        $request_resource = BookingUpdateRequestResource::collection($updateRequests);
+
+        return response()->json([
+            'data' => $request_resource
+        ], 200);
     }
 }
