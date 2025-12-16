@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Booking;
+use App\Models\UpdateRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -67,7 +68,18 @@ class BookingRepo
                 ->where('from_date', '<=' ,$booking->to_date)
                 ->where('to_date' , '>=' , $booking->from_date)
                 ->where('id', '!=', $booking->id)
-                ->update(['status' => 'declined']);
+                ->where('status', '!=', Booking::STATUS_CANCELED)
+                ->update(['status' => Booking::STATUS_DECLINED]);
+
+            // delete conflict updateRequest
+            UpdateRequest::whereHas('booking', function ($query) use ($booking) 
+            {
+                $query->where('apartment_id', $booking->apartment_id);
+            })
+            ->where('new_from_date', '<=', $booking->to_date)
+            ->where('new_to_date', '>=', $booking->from_date)
+            ->orWhere('new_from_date', '<', now())
+            ->delete();
         });
 
         return true;

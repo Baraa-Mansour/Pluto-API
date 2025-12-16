@@ -6,15 +6,18 @@ use App\Models\Booking;
 use App\Repositories\BookingRepo;
 use DomainException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BookingService
 {
     private BookingRepo $bookingRepo;
+    private UpdateRequestService $updateRequestService;
 
-    public function __construct(BookingRepo $bookingRepo)
+    public function __construct(BookingRepo $bookingRepo, UpdateRequestService $updateRequestService)
     {
         $this->bookingRepo = $bookingRepo;
+        $this->updateRequestService = $updateRequestService;
     }
 
 
@@ -108,14 +111,21 @@ class BookingService
 
         $booking->status = Booking::STATUS_CANCELED;
 
-        return $this->bookingRepo->saveBooking($booking);
+        DB::transaction(function () use ($booking)
+        {
+            $this->bookingRepo->saveBooking($booking);
+
+            $this->updateRequestService->deleteBookingUpdateRequest($booking->id);
+        });
+
+        return true;
     }
     
     private function validBookingToCancel(Booking $booking)
     {
         Log::info('BookingService validBookingToCancel called');
 
-        $bookingStartDate = Carbon::parse($booking->from_date)->subDay();
+        $bookingStartDate = Carbon::parse($booking->from_date);
 
         $isValid = $booking->status !== Booking::STATUS_DECLINED && 
                    $booking->status !== Booking::STATUS_CANCELED &&
@@ -127,7 +137,7 @@ class BookingService
     {
         Log::info('BookingService validBookingToAccept called');
 
-        $bookingStartDate = Carbon::parse($booking->from_date)->subDay();
+        $bookingStartDate = Carbon::parse($booking->from_date);
 
         $isAccepted = $booking->status === Booking::STATUS_REGISTERED && $bookingStartDate->gt(Carbon::today());
 

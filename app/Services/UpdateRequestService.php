@@ -7,6 +7,7 @@ use App\Repositories\BookingRepo;
 use App\Repositories\UpdateRequestRepo;
 use DomainException;
 use Illuminate\Support\Facades\Log;
+use function Symfony\Component\Clock\now;
 
 class UpdateRequestService
 {
@@ -72,6 +73,25 @@ class UpdateRequestService
     {
         return UpdateRequest::with('booking.apartment')
                             ->where('id', $updateRequestId)
+                            ->where('new_from_date', '>', now())
                             ->firstOrFail();
+    }
+
+    public function acceptUpdate(UpdateRequest $updateRequest)
+    {
+        $booking = $this->bookingRepo->findBookingById($updateRequest->booking_id);
+
+        $booking->from_date = $updateRequest->new_from_date;
+        $booking->to_date = $updateRequest->new_to_date;
+
+        return $this->bookingRepo->acceptBookingAndDeclineOthers($booking);
+
+    }
+
+    public function deleteBookingUpdateRequest(int $bookingId)
+    {
+        $booking = $this->bookingRepo->findBookingById($bookingId);
+
+        UpdateRequest::where('booking_id', $booking->id)->delete();
     }
 }

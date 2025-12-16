@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\bookingRequest\UpdateBookingRequest;
 use App\Http\Resources\BookingResource\BookingUpdateRequestResource;
 use App\Models\Booking;
+use App\Models\UpdateRequest;
 use App\Services\UpdateRequestService;
 use DomainException;
 use Illuminate\Http\Request;
@@ -71,17 +72,35 @@ class UpdateRequestController extends Controller
     {
         $updateRequest = $this->updateRequestService->getUpdateRequestById($updateRequestId);
 
-        if($request->user()->id !== $updateRequest->booking->apartment->user_id)
-        {
-            return response()->json([
-                'message' => 'UnAuthorize'
-            ], 403);
-        }
+        $this->checkAuth($request->user()->id, $updateRequest);
 
         $updateRequest->delete();
 
         return response()->json([
             'message' => 'deleted successfully'
         ], 200);
+    }
+
+    public function acceptUpdate(Request $request, int $updateRequestId)
+    {
+        $updateRequest = $this->updateRequestService->getUpdateRequestById($updateRequestId);
+
+        $this->checkAuth($request->user()->id, $updateRequest);
+
+        $isAccepted = $this->updateRequestService->acceptUpdate($updateRequest);
+
+        return response()->json([
+            'message' => 'Accepted successfully'
+        ], 200);
+    }
+
+    private function checkAuth(int $userId,UpdateRequest $updateRequest)
+    {
+        if($userId !== $updateRequest->booking->apartment->user_id)
+        {
+            return response()->json([
+                'message' => 'UnAuthorize'
+            ], 403);
+        }
     }
 }
