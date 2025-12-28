@@ -33,6 +33,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'profile_image' => fake()->randomElement(['profile_images/man.jpg' , 'profile_images/woman.jpg']),
             'id_image' => 'id_images/id.jpg',
+            'balance' => $this->faker->randomFloat(2, 0, 1000000),
         ];
     }
 
