@@ -65,6 +65,7 @@ class AuthService
 
         $user->role = User::ROLE_USER;
         $user->status = User::STATUS_REGISTERED;
+        $user->balance = 500000;
 
         Log::info('service getUserInstanceFromData succeeded for phone: ' . $userData['phone']);
 
