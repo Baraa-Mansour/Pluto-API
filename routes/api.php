@@ -94,4 +94,4 @@ Route::prefix('/bookings')
 
 
 Route::get('/cities' , [CityController::class , 'getAllCities'])->middleware('auth:sanctum');
-Route::get('/paymentMethods' , [PaymentMethodController::class , 'getAllPaymentMethods'])->middleware('auth:sanctum');
+//Route::get('/paymentMethods' , [PaymentMethodController::class , 'getAllPaymentMethods'])->middleware('auth:sanctum');
