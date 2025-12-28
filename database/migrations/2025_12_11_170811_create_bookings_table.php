@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreignId('apartment_id')->constrained('apartments')->onDelete('cascade');
             $table->date('from_date');
             $table->date('to_date');
-            $table->foreignId('payment_method_id')->constrained('payment_methods')->onDelete('cascade');
+            //$table->foreignId('payment_method_id')->constrained('payment_methods')->onDelete('cascade');
+            $table->decimal('total_price')->unsigned();
             $table->enum('status' , [
                 Booking::STATUS_ACCEPTED, 
                 Booking::STATUS_CANCELED, 

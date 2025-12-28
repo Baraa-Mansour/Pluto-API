@@ -151,8 +151,9 @@ class BookingService
         $booking->apartment_id = $data['apartment_id'];
         $booking->from_date = $data['from_date'];
         $booking->to_date = $data['to_date'];
-        $booking->payment_method_id = $data['payment_method_id'];
+        //$booking->payment_method_id = $data['payment_method_id'];
         $booking->status = Booking::STATUS_REGISTERED;
+        $booking->total_price = 50000;
 
         return $booking;
     }
