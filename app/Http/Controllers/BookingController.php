@@ -116,7 +116,7 @@ class BookingController extends Controller
 
             return response()->json([
                 'message' => $e->getMessage()
-            ], 422);
+            ], 400);
         }
     }
 

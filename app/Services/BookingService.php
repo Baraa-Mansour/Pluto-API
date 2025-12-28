@@ -123,9 +123,17 @@ class BookingService
             throw new DomainException('This booking already proceed');
         }
 
-        $booking->status = Booking::STATUS_DECLINED;
+        db::transaction(function () use ($booking)
+        {
+            // Refund user balance
+            $user = $this->userRepo->findUserById($booking->user_id);
+            $this->balanceService->increase($user, $booking->total_price);
 
-        return $this->bookingRepo->saveBooking($booking);
+            $booking->status = Booking::STATUS_DECLINED;
+            $this->bookingRepo->saveBooking($booking);
+        });
+
+        return true;
     }
 
     public function cancelBooking(int $bookingId)
