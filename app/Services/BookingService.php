@@ -2,22 +2,33 @@
 
 namespace App\Services;
 
+use App\Exceptions\NotEnoughBalanceException;
 use App\Models\Booking;
 use App\Repositories\BookingRepo;
+use App\Repositories\UserRepo;
 use DomainException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Repositories\ApartmentRepo;
+use App\Services\BalanceService;
 
 class BookingService
 {
     private BookingRepo $bookingRepo;
     private UpdateRequestService $updateRequestService;
+    private UserRepo $userRepo;
+    private ApartmentRepo $apartmentRepo;
+    private BalanceService $balanceService;
 
-    public function __construct(BookingRepo $bookingRepo, UpdateRequestService $updateRequestService)
+    public function __construct(BookingRepo $bookingRepo, UpdateRequestService $updateRequestService, UserRepo $userRepo, 
+    ApartmentRepo $apartmentRepo, BalanceService $balanceService)
     {
         $this->bookingRepo = $bookingRepo;
         $this->updateRequestService = $updateRequestService;
+        $this->userRepo = $userRepo;
+        $this->apartmentRepo = $apartmentRepo;
+        $this->balanceService = $balanceService;
     }
 
 
@@ -43,6 +54,19 @@ class BookingService
     {
         Log::info('BookingService createBooking Called');
 
+        $user = $this->userRepo->findUserById($userId);
+        $apartment = $this->apartmentRepo->getApartmentById($data['apartment_id']);
+
+        $totalPrice = $this->calculateTotalPrice($apartment->price, $data['from_date'], $data['to_date']);
+
+        if($user->balance < $totalPrice)
+        {
+            Log::error('BookingService createBooking dont have enough balance');
+
+            throw new NotEnoughBalanceException();
+        }
+
+        $data['total_price'] = $totalPrice;
         $booking = $this->getBookingInstanceFromData($data , $userId);
 
         $isAvailable = $this->bookingRepo->isBookingAccepted(
@@ -57,7 +81,15 @@ class BookingService
             throw new DomainException('Apartment already booked or You have already registered at same date');
         }
 
-        return $this->bookingRepo->createBooking($booking);
+        db::transaction(function () use ($booking, $user, $totalPrice)
+        {
+            // Deduct user balance
+            $this->balanceService->deduct($user, $totalPrice);
+
+            $this->bookingRepo->saveBooking($booking);
+        });
+
+        return true;
     }
 
     public function acceptBooking(int $bookingId)
@@ -143,6 +175,7 @@ class BookingService
 
         return $isAccepted;
     }
+
     private function getBookingInstanceFromData(array $data , int $userId)
     {
         $booking = new Booking();
@@ -153,8 +186,22 @@ class BookingService
         $booking->to_date = $data['to_date'];
         //$booking->payment_method_id = $data['payment_method_id'];
         $booking->status = Booking::STATUS_REGISTERED;
-        $booking->total_price = 50000;
+        $booking->total_price = $data['total_price'];
 
         return $booking;
+    }
+
+    private function getDaysBetweenDates(string $fromDate , string $toDate)
+    {
+        $from = Carbon::parse($fromDate);
+        $to = Carbon::parse($toDate);
+
+        return $from->diffInDays($to) + 1;
+    }
+    private function calculateTotalPrice(float $pricePerDay, string $fromDate , string $toDate)
+    {
+        $days = $this->getDaysBetweenDates($fromDate , $toDate);
+
+        return $pricePerDay * $days;
     }
 }

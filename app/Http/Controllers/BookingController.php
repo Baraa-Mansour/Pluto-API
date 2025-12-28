@@ -8,6 +8,7 @@ use App\Services\BookingService;
 use DomainException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Exceptions\NotEnoughBalanceException;
 
 class BookingController extends Controller
 {
@@ -57,6 +58,14 @@ class BookingController extends Controller
             return response()->json([
                 'message' => 'Reequest added successfully'
             ], 201);
+        }
+        catch(NotEnoughBalanceException $e)
+        {
+            Log::warning('BookingController createBooking failed due to not enough balance');
+
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 402);
         }
         catch(DomainException $e)
         {
