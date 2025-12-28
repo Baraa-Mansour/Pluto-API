@@ -45,7 +45,7 @@ class BookingRepo
     {
         Log::info('BookingRepo getOwnerRegistrations called');
 
-        $registration = Booking::with('apartment')
+        $registration = Booking::with('apartment', 'user')
                         ->where('status', Booking::STATUS_REGISTERED)
                         ->whereHas('apartment', function ($query) use ($ownerId) 
                         {
