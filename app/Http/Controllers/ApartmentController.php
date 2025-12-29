@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ApartmentRequest\ApartmentRateRequest;
-use App\Http\Requests\ApartmentsRequest\ApartmentFilterRequest;
 use App\Http\Resources\ApartmentResource\ApartmentScrollResource;
 use App\Http\Resources\ApartmentResource\ApartmentDetailResource;
-use App\Http\Requests\ApartmentsRequest\ApartmentCreateRequest;
 use App\Models\Apartment;
 use App\Services\ApartmentService;
 use App\services\RateService;
 use DomainException;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\ApartmentRequest\ApartmentCreateRequest;
+use App\Http\Requests\ApartmentRequest\ApartmentFilterRequest;
+use App\Http\Requests\ApartmentRequest\ApartmentRateRequest;
+
 
 class ApartmentController extends Controller
 {

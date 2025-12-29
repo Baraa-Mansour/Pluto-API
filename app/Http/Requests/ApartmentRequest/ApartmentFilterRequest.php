@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\ApartmentsRequest;
+namespace App\Http\Requests\ApartmentRequest;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

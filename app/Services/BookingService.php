@@ -40,7 +40,6 @@ class BookingService
 
         return $bookings;
     }
-
     public function getOwnerRegistrations(int $ownerId)
     {
         Log::info('BookingService getOwnerRegistrations called');
@@ -49,6 +48,7 @@ class BookingService
 
         return $registration;
     }
+
 
     public function createBooking(array $data, int $userId)
     {
@@ -92,6 +92,7 @@ class BookingService
         return true;
     }
 
+    // owner
     public function acceptBooking(int $bookingId)
     {
         Log::info('BookingService acceptBooking called');
@@ -135,7 +136,9 @@ class BookingService
 
         return true;
     }
+    //--
 
+    // customer
     public function cancelBooking(int $bookingId)
     {   
         Log::info('BookingService cancelBookiing called');
@@ -160,7 +163,9 @@ class BookingService
 
         return true;
     }
-    
+    //--
+
+    // helpers
     private function validBookingToCancel(Booking $booking)
     {
         Log::info('BookingService validBookingToCancel called');
@@ -212,4 +217,5 @@ class BookingService
 
         return $pricePerDay * $days;
     }
+    //--
 }
