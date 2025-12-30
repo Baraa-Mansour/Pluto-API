@@ -17,12 +17,12 @@ class BookingsForOwnerResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => $this->user->first_name,
+            'user_name' => $this->user->first_name,
+            'user_phone' => $this->user->phone,
             'apartment' => new ApartmentDetailResource($this->apartment),
             'from_date' => $this->from_date->format('Y-m-d'),
             'to_date' => $this->to_date->format('Y-m-d'),
             'status' => $this->status,
-            'total_price' => $this->total_price
         ];
     }
 }

@@ -20,8 +20,10 @@ class UserDetailResource extends JsonResource
             'last_name' => $this->last_name,
             'phone' => $this->phone,
             'birth_date' => $this->birth_date->format('Y-m-d'),
+            'balance' => $this->balance,
             'profile_image' => $this->profile_image_url,
             'id_image' => $this->id_image_url,
         ];
     }
 }
+ 
