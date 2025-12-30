@@ -8,15 +8,22 @@ use App\Repositories\UpdateRequestRepo;
 use DomainException;
 use Illuminate\Support\Facades\Log;
 use function Symfony\Component\Clock\now;
+use Illuminate\Support\Facades\DB;
 
 class UpdateRequestService
 {
     private UpdateRequestRepo $updateRequestRepo;
     private BookingRepo $bookingRepo;
-    public function __construct(UpdateRequestRepo $updateRequestRepo, BookingRepo $bookingRepo)
+    private BookingService $bookingService;
+    private BalanceService $balanceService;
+
+    public function __construct(UpdateRequestRepo $updateRequestRepo, BookingRepo $bookingRepo,
+        BookingService $bookingService, BalanceService $balanceService)
     {
         $this->updateRequestRepo = $updateRequestRepo;
         $this->bookingRepo = $bookingRepo;
+        $this->bookingService = $bookingService;
+        $this->balanceService = $balanceService;
     }
 
     public function createUpdateBookingRequest(array $data)
@@ -84,7 +91,7 @@ class UpdateRequestService
         $booking->from_date = $updateRequest->new_from_date;
         $booking->to_date = $updateRequest->new_to_date;
 
-        return $this->bookingRepo->acceptBookingAndDeclineOthers($booking);
+        return $this->bookingService->acceptBookingAndDeclineOthers($booking);
 
     }
 
@@ -93,5 +100,35 @@ class UpdateRequestService
         $booking = $this->bookingRepo->findBookingById($bookingId);
 
         UpdateRequest::where('booking_id', $booking->id)->delete();
+    }
+
+    public function deleteUpdateRequestForApartmentInDate(int $apartmentId, string $fromDate, string $toDate)
+    {
+        Log::info('UpdateRequestService deleteUpdateRequestForApartmentInDate called');
+
+        $updateRequests = $this->updateRequestRepo->getUpdateRequestForApartmentInDate(
+            $apartmentId, $fromDate, $toDate
+        );
+
+        // refund then delete
+        foreach ($updateRequests as $updateRequest) 
+        {
+            db::transaction(function () use ($updateRequest) 
+            {                
+                if($updateRequest->price_change > 0)
+                {
+                    $user = $this->bookingRepo->findBookingById($updateRequest->booking_id)->user;
+
+                    // refund balance to user
+                    $this->balanceService->increase(
+                        $user, 
+                        $updateRequest->price_change
+                    );                    
+                }
+
+                $updateRequest->delete();
+            });
+        }
+        
     }
 }

@@ -7,7 +7,7 @@ use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GovernorateController;
 use App\Http\Controllers\CityController;
-use App\Http\Controllers\PaymentMethodController;
+//use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\UpdateRequestController;
 use Illuminate\Support\Facades\Route;
 

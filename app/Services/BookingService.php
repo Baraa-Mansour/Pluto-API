@@ -106,9 +106,7 @@ class BookingService
             throw new DomainException('This booking already proceed or its expire');
         }
 
-        $booking->status = Booking::STATUS_ACCEPTED;
-
-        return $this->bookingRepo->acceptBookingAndDeclineOthers($booking);
+        return $this->acceptBookingAndDeclineOthers($booking);
     }
 
     public function declineBooking(int $bookingId)
@@ -159,6 +157,11 @@ class BookingService
             $this->bookingRepo->saveBooking($booking);
 
             $this->updateRequestService->deleteBookingUpdateRequest($booking->id);
+
+            $this->balanceService->increase(
+                $this->userRepo->findUserById($booking->user_id),
+                $booking->total_price
+            );
         });
 
         return true;
@@ -202,6 +205,36 @@ class BookingService
         $booking->total_price = $data['total_price'];
 
         return $booking;
+    }
+
+    public function acceptBookingAndDeclineOthers(Booking $booking)
+    {
+        Log::info('BookingRepo acceptBookingAndDecclindeOthers');
+
+        DB::transaction(function () use ($booking) {
+            // accept this booking
+            $booking->status = Booking::STATUS_ACCEPTED;
+            $booking->save();
+    
+            // decline all others with same apartment and on range date
+            $declinedBookings = $this->bookingRepo->declineOtherApartmentBookingsBetweenDates($booking);
+
+            foreach ($declinedBookings as $declinedBooking) 
+            {
+                // refund balance to users of declined bookings
+                $user = $this->userRepo->findUserById($declinedBooking->user_id);
+                $this->balanceService->increase($user, $declinedBooking->total_price);
+            }
+
+            // delete conflict updateRequest
+            $this->updateRequestService->deleteUpdateRequestForApartmentInDate(
+                $booking->apartment_id, 
+                $booking->from_date, 
+                $booking->to_date
+            );
+        });
+
+        return true;
     }
 
     private function getDaysBetweenDates(string $fromDate , string $toDate)

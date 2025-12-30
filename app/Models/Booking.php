@@ -14,6 +14,7 @@ class Booking extends Model
     public const STATUS_ACCEPTED = 'accepted';
     public const STATUS_DECLINED = 'declined';
     public const STATUS_CANCELED = 'canceled';
+    public const STATUS_COMPLETED = 'completed';
     //
 
     // Relations

@@ -26,16 +26,12 @@ class BookingRegisterRequest extends FormRequest
         return [
             'apartment_id' => [
                 'required',
-                Rule::exists('apartments' , 'id')
-                ->where(function ($query) 
-                {
-                    $query->whereNotIn('user_id', function ($sub) 
-                    {
-                        $sub->select('id')
-                            ->from('users')
-                            ->where('status' , [User::STATUS_DELETED,User::STATUS_REGISTERED]);
-                    });
-                }),
+                Rule::exists('apartments', 'id') 
+                ->whereNotIn(
+                    'user_id', 
+                    User::whereIn('status', [ User::STATUS_DELETED, User::STATUS_REGISTERED ])
+                    ->pluck('id')->toArray()
+            ),
             ], // check if apartment deleted
             'from_date' => 'required|date|after:tomorrow', // from date should be at least tomorrow
             'to_date' => 'required|date|after_or_equal:from_date',

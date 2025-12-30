@@ -55,36 +55,6 @@ class BookingRepo
         return $registration;
     }
 
-    public function acceptBookingAndDeclineOthers(Booking $booking)
-    {
-        Log::info('BookingRepo acceptBookingAndDecclindeOthers');
-
-        DB::transaction(function () use ($booking) {
-            // accept this booking
-            $booking->save();
-    
-            // decline all others with same apartment and on range date
-            Booking::where('apartment_id', $booking->apartment_id)
-                ->where('from_date', '<=' ,$booking->to_date)
-                ->where('to_date' , '>=' , $booking->from_date)
-                ->where('id', '!=', $booking->id)
-                ->where('status', '!=', Booking::STATUS_CANCELED)
-                ->update(['status' => Booking::STATUS_DECLINED]);
-
-            // delete conflict updateRequest
-            UpdateRequest::whereHas('booking', function ($query) use ($booking) 
-            {
-                $query->where('apartment_id', $booking->apartment_id);
-            })
-            ->where('new_from_date', '<=', $booking->to_date)
-            ->where('new_to_date', '>=', $booking->from_date)
-            ->orWhere('new_from_date', '<', now())
-            ->delete();
-        });
-
-        return true;
-    }
-
     public function cancelFutureBookingsForUser(int $userId)
     {
         Log::info('BookingRepo cancelFutureBookingsForUser called');
@@ -154,6 +124,25 @@ class BookingRepo
         return empty($result);
     }
 
+    public function declineOtherApartmentBookingsBetweenDates(Booking $booking)
+    {
+        Log::info('BookingRepo declineOtherApartmentBookingsBetweenDates called');
+
+        $declinedBookings = Booking::where('apartment_id', $booking->apartment_id)
+                                   ->where('from_date', '<=' ,$booking->to_date)
+                                   ->where('to_date' , '>=' , $booking->from_date)
+                                   ->where('id', '!=', $booking->id)
+                                   ->where('status', Booking::STATUS_REGISTERED)
+                                   ->get();
+
+        foreach($declinedBookings as $b)
+        {
+            $b->status = Booking::STATUS_DECLINED;
+            $b->save();
+        }
+
+        return $declinedBookings;
+    }
     
     public function isApartmentBookedInDateFromAnother(int $apartmentId, int $bookingId, $fromDate, $toDate)
     {

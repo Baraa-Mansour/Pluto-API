@@ -56,7 +56,7 @@ class BookingController extends Controller
             $isSaved = $this->bookingService->createBooking($validated , $request->user()->id);
 
             return response()->json([
-                'message' => 'Reequest added successfully'
+                'message' => 'Request added successfully'
             ], 201);
         }
         catch(NotEnoughBalanceException $e)
@@ -94,7 +94,7 @@ class BookingController extends Controller
 
             return response()->json([
                 'message' => $e->getMessage()
-            ], 422);
+            ], 400);
         }
     }
 
@@ -138,7 +138,7 @@ class BookingController extends Controller
 
             return response()->json([
                 'message' => $e->getMessage()
-            ], 422);
+            ], 400);
         }
     }
 }
