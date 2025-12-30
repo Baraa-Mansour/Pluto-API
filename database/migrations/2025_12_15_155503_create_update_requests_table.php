@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('booking_id')->constrained('bookings')->onDelete('cascade');
             $table->date('new_from_date');
             $table->date('new_to_date');
+            $table->decimal('price_change');
             $table->timestamps();
         });
     }

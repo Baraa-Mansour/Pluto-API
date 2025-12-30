@@ -13,6 +13,6 @@ class FavouriteApartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        FavouriteApartment::factory()->count(30)->create();
+        FavouriteApartment::factory()->count(20)->create();
     }
 }

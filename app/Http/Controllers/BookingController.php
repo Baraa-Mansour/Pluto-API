@@ -141,4 +141,11 @@ class BookingController extends Controller
             ], 400);
         }
     }
+
+    public function getOk()
+    {
+        return 'ok';
+    }
 }
+
+

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\NotEnoughBalanceException;
 use App\Models\UpdateRequest;
 use App\Repositories\BookingRepo;
 use App\Repositories\UpdateRequestRepo;
@@ -14,19 +15,17 @@ class UpdateRequestService
 {
     private UpdateRequestRepo $updateRequestRepo;
     private BookingRepo $bookingRepo;
-    private BookingService $bookingService;
     private BalanceService $balanceService;
 
     public function __construct(UpdateRequestRepo $updateRequestRepo, BookingRepo $bookingRepo,
-        BookingService $bookingService, BalanceService $balanceService)
+        BalanceService $balanceService)
     {
         $this->updateRequestRepo = $updateRequestRepo;
         $this->bookingRepo = $bookingRepo;
-        $this->bookingService = $bookingService;
         $this->balanceService = $balanceService;
     }
 
-    public function createUpdateBookingRequest(array $data)
+    public function createUpdateBookingRequest(array $data, BookingService $bookingService)
     {
         Log::info('UpdateRequestService createUpdateBookingRequest called');
 
@@ -58,7 +57,39 @@ class UpdateRequestService
         $updateRequest->new_from_date = $data['new_from_date'];
         $updateRequest->new_to_date = $data['new_to_date'];
 
-        return $updateRequest->save();
+        $originalPrice = $data['booking']->total_price;
+        $newPrice = $bookingService->calculateTotalPrice(
+            $data['booking']->apartment->price,
+            $data['new_from_date']->toDateString(),
+            $data['new_to_date']->toDateString()
+        );
+
+        $updateRequest->price_change = $this->calculatePriceChange($originalPrice, $newPrice);
+
+        if($updateRequest->price_change > $data['booking']->user->balance)
+        {
+            Log::info('UpdateRequestService createUpdateBookingRequest faild: not enough balance for price change');
+
+            throw new NotEnoughBalanceException('Not enough balance!');
+        }
+
+        db::transaction(function () use ($updateRequest, $data) 
+        {
+            if($updateRequest->price_change > 0)
+            {
+                $user = $data['booking']->user;
+
+                $this->balanceService->deduct(
+                    $user, 
+                    $updateRequest->price_change
+                );
+
+                $user->save();
+            }
+
+            $updateRequest->save();
+        });
+
     }
 
     public function getOwnerUpdateRequest(int $ownerId)
@@ -84,22 +115,88 @@ class UpdateRequestService
                             ->firstOrFail();
     }
 
-    public function acceptUpdate(UpdateRequest $updateRequest)
+    public function acceptUpdate(UpdateRequest $updateRequest, BookingService $bookingService)
     {
         $booking = $this->bookingRepo->findBookingById($updateRequest->booking_id);
 
         $booking->from_date = $updateRequest->new_from_date;
         $booking->to_date = $updateRequest->new_to_date;
+        $booking->total_price += $updateRequest->price_change;
 
-        return $this->bookingService->acceptBookingAndDeclineOthers($booking);
+        db::transaction(function () use($booking, $updateRequest, $bookingService)
+        {
+            if($updateRequest->price_change < 0)
+            {
+                $user = $booking->user;
+
+                $this->balanceService->increase(
+                    $user, 
+                    abs($updateRequest->price_change)
+                );
+
+                $user->save();
+            }
+
+            $bookingService->acceptBookingAndDeclineOthers($booking);
+
+            $updateRequest->delete();
+        });
 
     }
 
     public function deleteBookingUpdateRequest(int $bookingId)
     {
         $booking = $this->bookingRepo->findBookingById($bookingId);
+        $updateRequest = UpdateRequest::where('booking_id', $booking->id)->first();
 
-        UpdateRequest::where('booking_id', $booking->id)->delete();
+        if(!$updateRequest)
+        {
+            return;
+        }
+
+        if($updateRequest->price_change > 0)
+        {
+            db::transaction(function () use ($updateRequest, $booking) 
+            {                
+                $user = $booking->user;
+
+                $this->balanceService->increase(
+                    $user, 
+                    $updateRequest->price_change
+                );
+                $user->save();
+
+                $updateRequest->delete();      
+            });
+            return;
+        }
+
+        $updateRequest->delete();
+    }
+
+    public function deleteUpdateRequest(UpdateRequest $updateRequest)
+    {
+
+        if($updateRequest->price_change > 0)
+        {
+            db::transaction(function () use ($updateRequest) 
+            {                
+                $user = $updateRequest->booking->user;
+
+                $this->balanceService->increase(
+                    $user, 
+                    $updateRequest->price_change
+                );
+
+                $user->save();
+                
+                $updateRequest->delete();      
+            });
+
+            return;
+        }
+
+        $updateRequest->delete();
     }
 
     public function deleteUpdateRequestForApartmentInDate(int $apartmentId, string $fromDate, string $toDate)
@@ -113,6 +210,10 @@ class UpdateRequestService
         // refund then delete
         foreach ($updateRequests as $updateRequest) 
         {
+            if(!$updateRequest)
+            {
+                return;
+            }
             db::transaction(function () use ($updateRequest) 
             {                
                 if($updateRequest->price_change > 0)
@@ -123,12 +224,19 @@ class UpdateRequestService
                     $this->balanceService->increase(
                         $user, 
                         $updateRequest->price_change
-                    );                    
+                    );         
+                    
+                    $user->save();
                 }
 
                 $updateRequest->delete();
             });
         }
         
+    }
+
+    private function calculatePriceChange(float $originalPrice, float $newPrice): float
+    {
+        return $newPrice - $originalPrice;
     }
 }

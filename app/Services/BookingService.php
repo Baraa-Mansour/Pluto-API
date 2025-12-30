@@ -224,6 +224,7 @@ class BookingService
                 // refund balance to users of declined bookings
                 $user = $this->userRepo->findUserById($declinedBooking->user_id);
                 $this->balanceService->increase($user, $declinedBooking->total_price);
+                $user->save();
             }
 
             // delete conflict updateRequest
@@ -244,7 +245,7 @@ class BookingService
 
         return $from->diffInDays($to) + 1;
     }
-    private function calculateTotalPrice(float $pricePerDay, string $fromDate , string $toDate)
+    public function calculateTotalPrice(float $pricePerDay, string $fromDate , string $toDate)
     {
         $days = $this->getDaysBetweenDates($fromDate , $toDate);
 

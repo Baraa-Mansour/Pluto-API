@@ -24,7 +24,8 @@ return new class extends Migration
                 Booking::STATUS_ACCEPTED, 
                 Booking::STATUS_CANCELED, 
                 Booking::STATUS_DECLINED,
-                Booking::STATUS_REGISTERED
+                Booking::STATUS_REGISTERED,
+                Booking::STATUS_COMPLETED
             ])->default(Booking::STATUS_REGISTERED);
             $table->timestamps();
         });

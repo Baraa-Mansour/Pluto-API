@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\NotEnoughBalanceException;
 use App\Http\Requests\bookingRequest\UpdateBookingRequest;
 use App\Http\Resources\BookingResource\BookingUpdateRequestResource;
 use App\Models\Booking;
 use App\Models\UpdateRequest;
+use App\Services\BookingService;
 use App\Services\UpdateRequestService;
 use DomainException;
 use Illuminate\Http\Request;
@@ -21,7 +23,7 @@ class UpdateRequestController extends Controller
         $this->updateRequestService = $updateRequestService;
     }
 
-    public function updateBookingRequest(UpdateBookingRequest $request)
+    public function updateBookingRequest(UpdateBookingRequest $request, BookingService $bookingService)
     {
         Log::info('UpdateRequestController updateBookingRequest called');
 
@@ -39,11 +41,19 @@ class UpdateRequestController extends Controller
 
         try
         {
-            $isUpdateRequestAdded = $this->updateRequestService->createUpdateBookingRequest($validated);
+            $isUpdateRequestAdded = $this->updateRequestService->createUpdateBookingRequest($validated, $bookingService);
 
             return response()->json([
                 'message' => 'Request added successfully'
             ], 200);
+        }
+        catch(NotEnoughBalanceException $ex)
+        {
+            Log::error('UpdateRequestController updateBookingRequest failed: ' . $ex->getMessage());
+
+            return response()->json([
+                'message' => $ex->getMessage()
+            ], 402);
         }
         catch(DomainException $ex)
         {
@@ -51,7 +61,7 @@ class UpdateRequestController extends Controller
 
             return response()->json([
                 'message' => $ex->getMessage()
-            ], 422);
+            ], 400);
         }
     }
 
@@ -74,20 +84,20 @@ class UpdateRequestController extends Controller
 
         $this->checkAuth($request->user()->id, $updateRequest);
 
-        $updateRequest->delete();
+        $this->updateRequestService->deleteUpdateRequest($updateRequest);
 
         return response()->json([
             'message' => 'deleted successfully'
         ], 200);
     }
 
-    public function acceptUpdate(Request $request, int $updateRequestId)
+    public function acceptUpdate(Request $request, int $updateRequestId, BookingService $bookingService)
     {
         $updateRequest = $this->updateRequestService->getUpdateRequestById($updateRequestId);
 
         $this->checkAuth($request->user()->id, $updateRequest);
 
-        $isAccepted = $this->updateRequestService->acceptUpdate($updateRequest);
+        $isAccepted = $this->updateRequestService->acceptUpdate($updateRequest, $bookingService);
 
         return response()->json([
             'message' => 'Accepted successfully'

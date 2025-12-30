@@ -90,6 +90,7 @@ Route::prefix('/bookings')
         Route::get('/updateRequests', [UpdateRequestController::class, 'getUpdateRequests']);
         Route::put('/updateRequests/{updateRequestId}', [UpdateRequestController::class, 'acceptUpdate']);
         Route::delete('/updateRequests/{updateRequestId}', [UpdateRequestController::class, 'deleteUpdate']);
+
     });
 
 
