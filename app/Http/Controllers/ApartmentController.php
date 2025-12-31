@@ -81,7 +81,7 @@ class ApartmentController extends Controller
 
             return response()->json([
                 'message' => $ex->getMessage()
-            ], 422);
+            ], 400);
         }
     }
 }
