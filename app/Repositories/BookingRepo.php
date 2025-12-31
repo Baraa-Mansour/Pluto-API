@@ -55,26 +55,25 @@ class BookingRepo
         return $registration;
     }
 
-    public function cancelFutureBookingsForUser(int $userId)
+    public function futureBookingsForUser(int $userId)
     {
-        Log::info('BookingRepo cancelFutureBookingsForUser called');
+        Log::info('BookingRepo futureBookingsForUser called');
 
-        Booking::where('user_id', $userId)
+        return Booking::where('user_id', $userId)
                ->whereIn('status', [Booking::STATUS_ACCEPTED,Booking::STATUS_REGISTERED])
-               ->where('from_date', '>', now()->subDay())
-               ->update(['status' => Booking::STATUS_CANCELED]);
+               ->where('from_date', '>', today())->get();
     }
-    public function declineFutureBookingsForOwner(int $userId)
+    public function futureBookingsForOwner(int $userId)
     {
-        Log::info('BookingRepo declineFutureRegistrationForOwner called');
+        Log::info('BookingRepo futureBookingsForOwner called');
 
-        Booking::whereHas('apartment', function ($query) use ($userId) 
+        return Booking::whereHas('apartment', function ($query) use ($userId) 
                 {
-                        $query->where('user_id', $userId);
+                    $query->where('user_id', $userId);
                 })
                 ->whereIn('status', [Booking::STATUS_REGISTERED, Booking::STATUS_ACCEPTED])
-                ->where('from_date', '>', now()->subDay())                
-                ->update(['status' => Booking::STATUS_DECLINED]);
+                ->where('from_date', '>', today())
+                ->get();
     }
 
     public function saveBooking(Booking $booking)
@@ -90,7 +89,7 @@ class BookingRepo
 
         $haveBooking = Booking::where('user_id', $userId)
                               ->where('apartment_id', $apartmentId)
-                              ->where('to_date', '<', now()->subDay())
+                              ->where('to_date', '<', today())
                               ->where('status', Booking::STATUS_ACCEPTED)
                               ->exists();
                               

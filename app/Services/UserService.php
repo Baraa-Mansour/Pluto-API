@@ -20,14 +20,16 @@ class UserService
     private FavouriteRepo $favouriteRepo;
     private ApartmentRepo $apartmentRepo;
     private BookingRepo $bookingRepo;
+    private BookingService $bookingService;
 
     public function __construct(UserRepo $userRepo, FavouriteRepo $favouriteRepo,ApartmentRepo $apartmentRepo,
-    BookingRepo $bookingRepo)
+    BookingRepo $bookingRepo, BookingService $bookingService)
     {
         $this->userRepo = $userRepo;
         $this->favouriteRepo = $favouriteRepo;
         $this->apartmentRepo = $apartmentRepo;
         $this->bookingRepo = $bookingRepo;
+        $this->bookingService = $bookingService;
     }
 
     public function getAllRegisters()
@@ -152,9 +154,19 @@ class UserService
         {
             $user->tokens()->delete();
 
-            $this->bookingRepo->cancelFutureBookingsForUser($user->id);
+            $futureBookings = $this->bookingRepo->futureBookingsForUser($user->id);
 
-            $this->bookingRepo->declineFutureBookingsForOwner($user->id);
+            foreach ($futureBookings as $booking) 
+            {
+                $this->bookingService->cancelBooking($booking->id);
+            }
+
+            $futureOwnerBookings = $this->bookingRepo->futureBookingsForOwner($user->id);
+
+            foreach ($futureOwnerBookings as $booking) 
+            {
+                $this->bookingService->declineBooking($booking->id);
+            }
 
             $this->userRepo->softDeleteUser($user->id);
         });

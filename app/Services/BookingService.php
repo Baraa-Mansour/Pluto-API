@@ -115,7 +115,7 @@ class BookingService
 
         $booking = $this->bookingRepo->findBookingById($bookingId);
 
-        if($booking->status !== Booking::STATUS_REGISTERED)
+        if(!$this->validBookingToDecline($booking))
         {
             Log::error('BookingService declineBooking condition failed');
 
@@ -130,6 +130,9 @@ class BookingService
 
             $booking->status = Booking::STATUS_DECLINED;
             $this->bookingRepo->saveBooking($booking);
+
+            $this->updateRequestService->deleteBookingUpdateRequest($booking->id);
+
         });
 
         return true;
@@ -177,6 +180,7 @@ class BookingService
 
         $isValid = $booking->status !== Booking::STATUS_DECLINED && 
                    $booking->status !== Booking::STATUS_CANCELED &&
+                   $booking->status !== Booking::STATUS_COMPLETED &&
                    $bookingStartDate->gt(Carbon::today());
                    
         return $isValid;        
@@ -190,6 +194,15 @@ class BookingService
         $isAccepted = $booking->status === Booking::STATUS_REGISTERED && $bookingStartDate->gt(Carbon::today());
 
         return $isAccepted;
+    }
+    private function validBookingToDecline(Booking $booking)
+    {
+        Log::info('BookingService validBookingToDecline called');
+
+        $isDeclined = $booking->status === Booking::STATUS_REGISTERED ||
+                      ($booking->status === Booking::STATUS_ACCEPTED && Carbon::parse($booking->from_date)->gt(Carbon::today()));
+
+        return $isDeclined;
     }
 
     private function getBookingInstanceFromData(array $data , int $userId)

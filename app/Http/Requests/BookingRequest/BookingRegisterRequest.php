@@ -33,7 +33,7 @@ class BookingRegisterRequest extends FormRequest
                     ->pluck('id')->toArray()
             ),
             ], // check if apartment deleted
-            'from_date' => 'required|date|after:tomorrow', // from date should be at least tomorrow
+            'from_date' => 'required|date|after:today', // from date should be at least today
             'to_date' => 'required|date|after_or_equal:from_date',
             //'payment_method_id' => 'required|exists:payment_methods,id'
         ];

@@ -95,10 +95,10 @@ class UpdateRequestService
     public function getOwnerUpdateRequest(int $ownerId)
     {
         return UpdateRequest::with('booking.apartment')
-                            ->where('new_from_date', '>', now())
+                            ->where('new_from_date', '>', today())
                             ->whereHas('booking', function ($query) 
                             {
-                                $query->where('from_date', '>', now());
+                                $query->where('from_date', '>', today());
                             })
                             ->whereHas('booking.apartment', function ($query) use ($ownerId) 
                             {
@@ -111,7 +111,7 @@ class UpdateRequestService
     {
         return UpdateRequest::with('booking.apartment')
                             ->where('id', $updateRequestId)
-                            ->where('new_from_date', '>', now())
+                            ->where('new_from_date', '>', today())
                             ->firstOrFail();
     }
 

@@ -30,7 +30,7 @@ class UpdateRequestController extends Controller
         $validated = $request->validated();
 
         $booking = Booking::where('id', $request->route('bookingId'))
-                          ->where('from_date', '>', now())
+                          ->where('from_date', '>', today())
                           ->where('status', Booking::STATUS_ACCEPTED)
                           ->firstOrFail();
 
