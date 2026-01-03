@@ -239,4 +239,16 @@ class UpdateRequestService
     {
         return $newPrice - $originalPrice;
     }
+
+    public function deleteExpiredUpdateRequests()
+    {
+        Log::info('UpdateRequestService declineExpiredUpdateRequests called');
+
+        $expiredUpdateRequests = UpdateRequest::where('new_from_date', '<=', today())->get();
+
+        foreach ($expiredUpdateRequests as $updateRequest) 
+        {
+            $this->deleteUpdateRequest($updateRequest);
+        }
+    }
 }

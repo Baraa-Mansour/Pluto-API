@@ -138,11 +138,33 @@ class BookingService
         return true;
     }
     //--
+    public function completeBooking(Booking $booking)
+    {
+        Log::info('BookingService completeBookings called');
 
+        if(!$this->validBookingToComplete($booking))
+        {
+            Log::error('BookingService completeBookings condition failed');
+
+            throw new DomainException('This booking is not valid to complete now');
+        }
+
+        $owner = $booking->apartment->user;
+
+        $booking->status = Booking::STATUS_COMPLETED;
+        db::transaction(function () use ($booking, $owner)
+        {
+            $this->bookingRepo->saveBooking($booking);
+
+            // pay owner
+            $this->balanceService->increase($owner, $booking->total_price);
+        });
+
+    }
     // customer
     public function cancelBooking(int $bookingId)
     {   
-        Log::info('BookingService cancelBookiing called');
+        Log::info('BookingService cancelBooking called');
 
         $booking = $this->bookingRepo->findBookingById($bookingId);
 
@@ -168,6 +190,46 @@ class BookingService
         });
 
         return true;
+    }
+    //--
+
+    // Background Jobs
+    public function completeAcceptedBookings()
+    {
+        Log::info('BookingService completeAcceptedBookings called');
+
+        $expiredBookings = $this->bookingRepo->getAllExpiredAcceptedBookings();
+
+        foreach ($expiredBookings as $booking) 
+        {
+            try 
+            {
+                $this->completeBooking($booking);
+            } 
+            catch (DomainException $e) 
+            {
+                Log::error('BookingService completeAcceptedBookings error: ' . $e->getMessage());
+            }
+        }
+    }
+
+    public function declineExpiredRegistrations()
+    {
+        Log::info('BookingService declineExpiredRegistrations called');
+
+        $expiredBookings = $this->bookingRepo->getAllExpiredRegisteredBookings();
+
+        foreach ($expiredBookings as $booking) 
+        {
+            try 
+            {
+                $this->declineBooking($booking->id);
+            } 
+            catch (DomainException $e) 
+            {
+                Log::error('BookingService declineExpiredRegistrations error: ' . $e->getMessage());
+            }
+        }
     }
     //--
 
@@ -203,6 +265,17 @@ class BookingService
                       ($booking->status === Booking::STATUS_ACCEPTED && Carbon::parse($booking->from_date)->gt(Carbon::today()));
 
         return $isDeclined;
+    }
+    private function validBookingToComplete(Booking $booking)
+    {
+        Log::info('BookingService validBookingToComplete called');
+
+        $bookingEndDate = Carbon::parse($booking->to_date);
+
+        $isValid = $booking->status === Booking::STATUS_ACCEPTED && 
+                   $bookingEndDate->lt(Carbon::today());
+                   
+        return $isValid;        
     }
 
     private function getBookingInstanceFromData(array $data , int $userId)

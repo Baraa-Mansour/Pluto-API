@@ -96,6 +96,25 @@ class BookingRepo
         return $haveBooking;
     }
 
+    public function getAllExpiredAcceptedBookings()
+    {
+        Log::info('BookingRepo getAllExpiredAcceptedBookings called');
+
+        return Booking::with('apartment.user')
+                      ->where('status', Booking::STATUS_ACCEPTED)
+                      ->where('to_date', '<', today())
+                      ->get();
+    }
+    public function getAllExpiredRegisteredBookings()
+    {
+        Log::info('BookingRepo getAllExpiredRegisteredBookings called');
+
+        return Booking::with('apartment.user')
+                      ->where('status', Booking::STATUS_REGISTERED)
+                      ->where('from_date', '<=', today())
+                      ->get();
+    }
+
     // check if apartment booked in date or user have registered
     public function isBookingAccepted(int $apartmentId, int $userId, $fromDate, $toDate)
     {
