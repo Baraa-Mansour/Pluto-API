@@ -9,6 +9,7 @@ use DomainException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\NotEnoughBalanceException;
+use App\Http\Resources\BookingResource\BookingsForOwnerResource;
 
 class BookingController extends Controller
 {
@@ -38,7 +39,7 @@ class BookingController extends Controller
 
         $registration = $this->bookingService->getOwnerRegistrations($request->user()->id);
 
-        $registration_resource = BookingsForUserResource::collection($registration);
+        $registration_resource = BookingsForOwnerResource::collection($registration);
 
         return response()->json([
             'data' => $registration_resource
