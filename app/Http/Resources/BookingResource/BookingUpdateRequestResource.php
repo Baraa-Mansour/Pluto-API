@@ -16,6 +16,7 @@ class BookingUpdateRequestResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'booking' => new BookingsForOwnerResource($this->booking),
             'new_from_date' => $this->new_from_date->format('Y-m-d'),
             'new_to_date' => $this->new_to_date->format('Y-m-d')
