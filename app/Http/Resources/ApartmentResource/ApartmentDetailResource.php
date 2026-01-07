@@ -25,6 +25,8 @@ class ApartmentDetailResource extends JsonResource
             'description' => $this->description,
             'photo' => $this->photo_url,
             'rate' => $this->rates->avg('rate') ?? 0,
+            'isFavourite' => $request->user()->favouriteApartments->contains($this->id),
+
         ];
     }
 }

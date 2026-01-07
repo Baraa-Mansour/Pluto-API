@@ -18,6 +18,7 @@ class ApartmentScrollResource extends JsonResource
             'id' => $this->id,
             'governorate' => $this->city->governorate->name,
             'city' => $this->city->name,
+            'isFavourite' => $request->user()->favouriteApartments->contains($this->id),
             'rate' => $this->rates->avg('rate') ?? 0,
             'photo' => $this->photo_url,
         ];

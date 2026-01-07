@@ -89,8 +89,7 @@ class BookingRepo
 
         $haveBooking = Booking::where('user_id', $userId)
                               ->where('apartment_id', $apartmentId)
-                              ->where('to_date', '<', today())
-                              ->where('status', Booking::STATUS_ACCEPTED)
+                              ->where('status', Booking::STATUS_COMPLETED)
                               ->exists();
                               
         return $haveBooking;
