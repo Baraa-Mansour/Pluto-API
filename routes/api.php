@@ -31,8 +31,10 @@ Route::prefix('/admin')
 
         Route::get('/report' , [AdminController::class , 'getReport']);
 
-        Route::delete('registers/{id}' , [AdminController::class , 'deleteRegister']);
-        Route::patch('registers/{id}' , [AdminController::class , 'acceptRegister']); 
+        Route::delete('/registers/{id}' , [AdminController::class , 'deleteRegister']);
+        Route::patch('/registers/{id}' , [AdminController::class , 'acceptRegister']); 
+
+        Route::post('/wallet/add-balance', [AdminController::class, 'addWalletBalance']);
 
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
     });

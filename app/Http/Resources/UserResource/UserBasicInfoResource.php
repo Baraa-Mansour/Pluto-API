@@ -20,6 +20,8 @@ class UserBasicInfoResource extends JsonResource
             'last_name' => $this->last_name,
             'phone' => $this->phone,
             'birth_date' => $this->birth_date->format('Y-m-d'),
+            'balance' => $this->balance,
+            'status' => $this->status,
         ];
     }
 }

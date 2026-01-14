@@ -7,15 +7,19 @@ use Illuminate\Support\Facades\Log;
 use App\Services\UserService;
 use App\Http\Resources\UserResource\UserBasicInfoResource;
 use App\Http\Resources\UserResource\UserRegisterResource;
+use App\Services\BalanceService;
+use App\Http\Requests\AdminRequest\AddBalanceRequest;
 use App\Models\User;
 
 class AdminController extends Controller
 {
     private UserService $userService;
+    private BalanceService $BalanceService;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, BalanceService $BalanceService)
     {
         $this->userService = $userService;
+        $this->BalanceService = $BalanceService;
     }
 
     
@@ -89,6 +93,22 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'User register accepted successfully'
+        ], 200);
+    }
+
+    public function addWalletBalance(AddBalanceRequest $request)
+    {
+        $validatedData = $request->validated();
+        $userId = $validatedData['user_id'];
+
+        $user = User::findOrFail($userId);
+
+        $amount = $validatedData['amount'];
+
+        $this->BalanceService->increase($user, $amount);
+
+        return response()->json([
+            'message' => 'Balance added successfully'
         ], 200);
     }
 
