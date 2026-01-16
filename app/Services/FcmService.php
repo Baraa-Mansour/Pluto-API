@@ -4,7 +4,8 @@ namespace App\Services;
 
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Kreait\Firebase\Messaging;
+
+use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 
@@ -26,12 +27,13 @@ class FcmService
         ]);
 
         $message = CloudMessage::new()
+            ->toToken($token)
             ->withNotification(Notification::create($title, $body))
             ->withData($data);
 
         try
         {
-            $this->messaging->send($message, $token);
+            $this->messaging->send($message);
             Log::info('FCM Notification sent successfully.');
         }
         catch(Exception $e)

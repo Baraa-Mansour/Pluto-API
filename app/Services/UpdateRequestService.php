@@ -8,7 +8,6 @@ use App\Repositories\BookingRepo;
 use App\Repositories\UpdateRequestRepo;
 use DomainException;
 use Illuminate\Support\Facades\Log;
-use function Symfony\Component\Clock\now;
 use Illuminate\Support\Facades\DB;
 
 class UpdateRequestService
@@ -141,6 +140,13 @@ class UpdateRequestService
 
             $updateRequest->delete();
         });
+
+        $bookingService->sendNotification(
+            $booking->user,
+            $booking->id,
+            'Booking Update Accepted',
+            'Your booking update request has been accepted. #' . $booking->id
+        );
 
     }
 

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->enum('role' ,  [User::ROLE_USER, User::ROLE_ADMIN])->default('user');
             $table->enum('status' ,  [User::STATUS_DELETED , User::STATUS_ACTIVE, User::STATUS_REGISTERED])->default('registered');
             $table->decimal('balance', 10, 2)->unsigned()->default(500000);
+            $table->string('fcm_token')->nullable();
             $table->timestamps();
         });
 

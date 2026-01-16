@@ -24,6 +24,7 @@ class LoginRequest extends FormRequest
         return [
             'phone' => 'required|string|regex:/^09[0-9]{8}$/',
             'password' => 'required|string|min:8',
+            'fcm_token' => 'nullable|string',
         ];
     }
 }

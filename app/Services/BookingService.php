@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\NotEnoughBalanceException;
 use App\Models\Booking;
+use App\Models\User;
 use App\Repositories\BookingRepo;
 use App\Repositories\UserRepo;
 use DomainException;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\ApartmentRepo;
 use App\Services\BalanceService;
+use App\Services\FcmService;
 
 class BookingService
 {
@@ -20,15 +22,17 @@ class BookingService
     private UserRepo $userRepo;
     private ApartmentRepo $apartmentRepo;
     private BalanceService $balanceService;
+    private FcmService $fcmService;
 
     public function __construct(BookingRepo $bookingRepo, UpdateRequestService $updateRequestService, UserRepo $userRepo, 
-    ApartmentRepo $apartmentRepo, BalanceService $balanceService)
+    ApartmentRepo $apartmentRepo, BalanceService $balanceService, FcmService $fcmService)
     {
         $this->bookingRepo = $bookingRepo;
         $this->updateRequestService = $updateRequestService;
         $this->userRepo = $userRepo;
         $this->apartmentRepo = $apartmentRepo;
         $this->balanceService = $balanceService;
+        $this->fcmService = $fcmService;
     }
 
 
@@ -89,6 +93,13 @@ class BookingService
             $this->bookingRepo->saveBooking($booking);
         });
 
+        $this->sendNotification(
+            $user,
+            $booking->id,
+            'Booking Request Created',
+            'Your booking request has been created successfully. #' . $booking->id
+        );
+
         return true;
     }
 
@@ -106,7 +117,14 @@ class BookingService
             throw new DomainException('This booking already proceed or its expire');
         }
 
-        return $this->acceptBookingAndDeclineOthers($booking);
+        $this->acceptBookingAndDeclineOthers($booking);
+
+        $this->sendNotification(
+            $booking->user,
+            $booking->id,
+            'Booking Request Accepted',
+            'Your booking request has been accepted. #' . $booking->id
+        );
     }
 
     public function declineBooking(int $bookingId)
@@ -135,6 +153,13 @@ class BookingService
 
         });
 
+        $this->sendNotification(
+            $booking->user,
+            $booking->id,
+            'Booking Request Declined',
+            'Your booking request has been declined. #' . $booking->id
+        );
+
         return true;
     }
     //--
@@ -159,6 +184,13 @@ class BookingService
             // pay owner
             $this->balanceService->increase($owner, $booking->total_price);
         });
+
+        $this->sendNotification(
+            $booking->user,
+            $booking->id,
+            'Booking Completed',
+            'Your booking has been completed successfully. #' . $booking->id
+        );
 
     }
     // customer
@@ -188,6 +220,13 @@ class BookingService
                 $booking->total_price
             );
         });
+
+        $this->sendNotification(
+            $booking->user,
+            $booking->id,
+            'Booking Canceled',
+            'Your booking has been canceled successfully. #' . $booking->id
+        );
 
         return true;
     }
@@ -295,17 +334,17 @@ class BookingService
 
     public function acceptBookingAndDeclineOthers(Booking $booking)
     {
-        Log::info('BookingRepo acceptBookingAndDecclindeOthers');
+        Log::info('BookingRepo acceptBookingAndDeclineOthers');
 
-        DB::transaction(function () use ($booking) {
+        $declinedBookings = DB::transaction(function () use ($booking) {
             // accept this booking
             $booking->status = Booking::STATUS_ACCEPTED;
             $booking->save();
     
             // decline all others with same apartment and on range date
-            $declinedBookings = $this->bookingRepo->declineOtherApartmentBookingsBetweenDates($booking);
+            $declinedBookingsTransaction = $this->bookingRepo->declineOtherApartmentBookingsBetweenDates($booking);
 
-            foreach ($declinedBookings as $declinedBooking) 
+            foreach ($declinedBookingsTransaction as $declinedBooking) 
             {
                 // refund balance to users of declined bookings
                 $user = $this->userRepo->findUserById($declinedBooking->user_id);
@@ -319,8 +358,20 @@ class BookingService
                 $booking->from_date, 
                 $booking->to_date
             );
+
+            return $declinedBookingsTransaction;
         });
 
+        foreach ($declinedBookings as $declinedBooking) 
+        {
+            $this->sendNotification(
+                $declinedBooking->user,
+                $declinedBooking->id,
+                'Booking Request Declined',
+                'Your booking request has been declined. #' . $declinedBooking->id
+            );
+        }
+        
         return true;
     }
 
@@ -336,6 +387,16 @@ class BookingService
         $days = $this->getDaysBetweenDates($fromDate , $toDate);
 
         return $pricePerDay * $days;
+    }
+
+    public function sendNotification(User $user, int $bookingId, string $title, string $body)
+    {
+        if(isset($user->fcm_token)) 
+        {
+            $this->fcmService->sendNotification($user->fcm_token, $title, $body, [
+                'booking_id' => $bookingId,
+            ]);
+        }
     }
     //--
 }

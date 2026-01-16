@@ -29,21 +29,26 @@ class AuthService
 
         return $isSaved;
     }
-    
-    public function loginUser(string $phone, string $password): ?User
+
+    public function loginUser(array $validatedData): ?User
     {
-        Log::info('service loginUser called for phone: ' . $phone);
+        Log::info('service loginUser called for phone: ' . $validatedData['phone']);
 
-        $user = $this->userRepo->findByPhone($phone);
+        $user = $this->userRepo->findByPhone($validatedData['phone']);
 
-        if ($user && password_verify($password, $user->password)) 
+        if ($user && password_verify($validatedData['password'], $user->password)) 
         {
-            Log::info('service loginUser succeeded for phone: ' . $phone);
+            Log::info('service loginUser succeeded for phone: ' . $validatedData['phone']);
+            if(isset($validatedData['fcm_token'])) 
+            {
+                $user->fcm_token = $validatedData['fcm_token'];
+                $this->userRepo->saveUser($user);
+            }
             return $user;
         }
 
-        Log::info('service loginUser failed for phone: ' . $phone);
-        
+        Log::info('service loginUser failed for phone: ' . $validatedData['phone']);
+
         return null;
     }
 

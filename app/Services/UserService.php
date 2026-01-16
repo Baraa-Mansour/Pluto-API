@@ -150,9 +150,12 @@ class UserService
     {
         Log::info('UserService deleteUserWithFutureBookingsAndTokens called');
 
+        $user->fcm_token = null;
+
         DB::transaction(function () use($user)
         {
             $user->tokens()->delete();
+            $this->userRepo->updateUser($user);
 
             $futureBookings = $this->bookingRepo->futureBookingsForUser($user->id);
 

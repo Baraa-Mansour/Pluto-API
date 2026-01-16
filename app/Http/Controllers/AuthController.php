@@ -46,7 +46,7 @@ class AuthController extends Controller
 
         Log::info('controller login called for phone: ' . $validatedData['phone']);
 
-        $user = $this->authService->loginUser($validatedData['phone'], $validatedData['password']);
+        $user = $this->authService->loginUser($validatedData);
 
         Log::info('controller login ' . ($user ? 'succeeded' : 'failed') . ' for phone: ' . $validatedData['phone']);
 
